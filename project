@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BoxWise Packaging Co. | The Box Optimization Project</title>
+<meta name="description" content="How a cubic polynomial finds the largest open-top box that can be made from one A4 sheet.">
+<style>
+:root{
+  --bg:#faf6ef; --card:#ffffff; --ink:#1f2937; --muted:#5b6472; --line:#e6dccb;
+  --brown:#b98a54; --brown-d:#8a6232; --blue:#1f5fa8; --red:#d03a2f; --green:#2b8a3e;
+  --water:rgba(40,140,230,.55);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+a{color:var(--blue)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+nav{position:sticky;top:0;z-index:50;background:rgba(250,246,239,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;gap:18px;height:56px;overflow-x:auto;white-space:nowrap}
+nav b{font-size:17px;margin-right:auto}
+nav a{text-decoration:none;color:var(--muted);font-size:14px}
+nav a:hover{color:var(--ink)}
+header.hero{padding:64px 0 36px;text-align:center}
+.badge{display:inline-block;background:#f1e3cc;color:var(--brown-d);padding:4px 12px;border-radius:99px;font-size:13px;font-weight:600;letter-spacing:.04em}
+h1{font-size:clamp(34px,6vw,60px);line-height:1.08;margin:14px 0 10px;letter-spacing:-.02em}
+h1 span{color:var(--brown-d)}
+.lead{font-size:19px;color:var(--muted);max-width:720px;margin:0 auto}
+section{padding:44px 0}
+h2{font-size:30px;margin:0 0 6px;letter-spacing:-.01em}
+h2 + p.sub{color:var(--muted);margin:0 0 22px}
+h3{margin:22px 0 6px;font-size:18px}
+.grid{display:grid;gap:18px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+@media(max-width:820px){.g2,.g3{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 1px 0 rgba(0,0,0,.02)}
+.quote{border-left:4px solid var(--brown);background:#fff;padding:14px 18px;border-radius:0 12px 12px 0;color:#3b4350;font-style:italic}
+.math{font-family:"Cambria Math",Cambria,"Times New Roman",serif;font-size:18px;background:#f6f1e7;border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:8px 0;overflow-x:auto}
+.math.big{font-size:21px;text-align:center}
+.tag{display:inline-block;font-size:12px;font-weight:700;color:#fff;background:var(--blue);border-radius:6px;padding:2px 8px;margin-right:6px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right}
+th:first-child,td:first-child{text-align:left}
+th{background:#f6f1e7;font-weight:600}
+tr.best td{background:#e8f4ea;font-weight:700}
+.note{font-size:14px;color:var(--muted)}
+.btn{appearance:none;border:0;border-radius:10px;padding:10px 16px;font:inherit;font-weight:600;cursor:pointer;background:var(--ink);color:#fff}
+.btn.alt{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn.blue{background:var(--blue)}
+.btn:hover{filter:brightness(1.08)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+
+/* ---------- 3D stage ---------- */
+.lab{display:grid;grid-template-columns:1.5fr 1fr;gap:18px}
+@media(max-width:900px){.lab{grid-template-columns:1fr}}
+.stage{perspective:1500px;height:440px;border-radius:16px;border:1px solid var(--line);
+  background:radial-gradient(ellipse at 50% 85%,#ffffff 0%,#f3ead9 55%,#e9dcc3 100%);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.fit{transform-style:preserve-3d;transform:scale(var(--k,1))}
+.tilt{position:relative;transform-style:preserve-3d;transform:rotateX(58deg) rotateZ(-35deg)}
+.sheet{position:relative;transform-style:preserve-3d}
+.part{position:absolute;transform-style:preserve-3d;backface-visibility:visible;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 3px,rgba(0,0,0,.03) 3px 6px),linear-gradient(135deg,#dcb783,#c59c63);
+  border:2px solid rgba(100,66,28,.28);transition:border-color .5s,opacity .3s}
+.back{transform-origin:50% 100%}.front{transform-origin:50% 0}
+.left{transform-origin:100% 50%}.right{transform-origin:0 50%}
+.corn{background:linear-gradient(135deg,#ecd9ba,#e0c799)}
+.sheet.marked .base,.sheet.marked .back,.sheet.marked .front,.sheet.marked .left,.sheet.marked .right{border:2px dashed var(--blue)}
+.sheet.marked .corn{border:2px solid var(--red)}
+.sheet.filling .back,.sheet.filling .front,.sheet.filling .left,.sheet.filling .right{opacity:.72}
+.w{position:absolute;background:var(--water);border:1px solid rgba(255,255,255,.55);display:none;backface-visibility:visible}
+.wtop{background:rgba(70,160,240,.5)}
+.caption{position:absolute;left:14px;right:14px;top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;z-index:5}
+.pill{font-size:12px;font-weight:700;padding:4px 10px;border-radius:99px;background:#fff;border:1px solid var(--line);color:var(--muted);transition:.3s}
+.pill.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.pill.done{background:#e8f4ea;color:var(--green);border-color:#bfe0c6}
+.say{position:absolute;left:14px;right:14px;bottom:12px;background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-weight:600;z-index:5;min-height:46px}
+.panel .stat{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--line)}
+.panel .stat:last-child{border:0}
+.panel .stat b{font-variant-numeric:tabular-nums}
+.big{font-size:34px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.bar{height:14px;background:#e9eef5;border-radius:99px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3d9be9,#1f5fa8)}
+input[type=range]{width:100%;accent-color:var(--blue)}
+input[type=number]{width:110px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font:inherit}
+canvas{width:100%;display:block;background:#fff;border:1px solid var(--line);border-radius:14px;touch-action:none;cursor:crosshair}
+details{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:10px 0}
+summary{cursor:pointer;font-weight:700}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:#fff;border-radius:99px;padding:5px 12px;cursor:pointer;font:inherit;font-size:14px}
+.chip:hover{border-color:var(--blue)}
+footer{padding:36px 0 60px;color:var(--muted);text-align:center;font-size:14px;border-top:1px solid var(--line)}
+.ok{color:var(--green);font-weight:700}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap">
+  <b>📦 BoxWise Packaging Co.</b>
+  <a href="#why">Why</a><a href="#lab">Box lab</a><a href="#model">The model</a>
+  <a href="#graph">Graph</a><a href="#data">Data</a><a href="#build">Prototype</a><a href="#challenge">Challenges</a><a href="#pitch">Pitch</a>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <span class="badge">ALGEBRA 2 · POLYNOMIAL FUNCTIONS PROJECT</span>
+  <h1>Which square should we cut to build the <span>biggest box?</span></h1>
+  <p class="lead">One A4 sheet. Four equal corner squares. One cubic polynomial that tells us exactly how big to cut. This site walks through the whole design, from the client brief to the final prototype.</p>
+  <p class="note">Presented by <b>BoxWise Packaging Co.</b> &nbsp;·&nbsp; Team: <i>add your names here</i></p>
+</div></header>
+
+<!-- WHY -->
+<section id="why"><div class="wrap">
+  <h2>Why are we doing this?</h2>
+  <p class="sub">The client brief, the question and what we need to prove.</p>
+  <div class="grid g2">
+    <div>
+      <div class="quote">“We ship our product in open-top trays made by cutting equal squares from each corner of an A4 sheet and folding up the sides. We want the tray with the largest possible volume. Tell us exactly what size squares to cut, prove it is the best choice, and send us a working prototype.”</div>
+      <h3>The real-world problem</h3>
+      <p>Companies pay for material, shipping space and storage. A tray that holds more product from the same sheet of cardboard saves money on every single shipment. But cutting a bigger square makes the walls taller <i>and</i> the base smaller, so it is not obvious where the best answer is.</p>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">What we need to do</h3>
+      <ul>
+        <li>Build real test boxes and look for a pattern.</li>
+        <li>Turn the pattern into a polynomial function <b>V(x)</b>.</li>
+        <li>Find a sensible domain, and describe degree, end behavior and zeros.</li>
+        <li>Use a graph to find the <b>maximum</b> volume.</li>
+        <li>Build the best box and compare it to the model (percent error).</li>
+        <li>Explain why the math answer may need adjusting in the real world.</li>
+      </ul>
+      <p class="note" style="margin-bottom:0"><b>Driving question:</b> how can a polynomial model help a company make the best design decision?</p>
+    </div>
+  </div>
+</div></section>
+
+<!-- LAB -->
+<section id="lab"><div class="wrap">
+  <h2>The box lab</h2>
+  <p class="sub">Press play to watch the sheet get marked, cut, folded and filled with water to test its volume. Then drag the slider to try a different cut size.</p>
+  <div class="lab">
+    <div>
+      <div class="stage" id="stage">
+        <div class="caption" id="pills">
+          <span class="pill" data-s="1">1 Mark</span><span class="pill" data-s="2">2 Cut</span>
+          <span class="pill" data-s="3">3 Fold</span><span class="pill" data-s="4">4 Fill with water</span>
+        </div>
+        <div class="fit" id="fit"><div class="tilt" id="tilt"><div class="sheet" id="sheet"></div></div></div>
+        <div class="say" id="say">Press ▶ Play to start the animation.</div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn blue" id="play">▶ Play animation</button>
+        <button class="btn alt" id="done">Skip to finished box</button>
+        <button class="btn alt" id="reset">↺ Reset</button>
+      </div>
+    </div>
+    <div class="card panel">
+      <h3 style="margin-top:0">Cut size x</h3>
+      <div class="row" style="justify-content:space-between"><span class="big" id="xval">4.04 cm</span><button class="chip" id="best">★ best cut</button></div>
+      <input type="range" id="xs" min="0.5" max="10.4" step="0.01" value="4.04" aria-label="Cut size x in centimetres">
+      <div class="chips" style="margin:8px 0 12px">
+        <button class="chip" data-x="1">1</button><button class="chip" data-x="2">2</button><button class="chip" data-x="3">3</button>
+        <button class="chip" data-x="5">5</button><button class="chip" data-x="7">7</button><button class="chip" data-x="9">9</button>
+      </div>
+      <div class="stat"><span>Length 29.7 − 2x</span><b id="dL">–</b></div>
+      <div class="stat"><span>Width 21 − 2x</span><b id="dW">–</b></div>
+      <div class="stat"><span>Height x</span><b id="dH">–</b></div>
+      <div class="stat"><span>Volume V(x)</span><b id="dV">–</b></div>
+      <div class="stat"><span>Compared with the best box</span><b id="dP">–</b></div>
+      <div class="math" id="calc" style="font-size:15px;margin-top:12px">–</div>
+      <h3>Water test</h3>
+      <div class="stat"><span>Water height</span><b id="wH">0.00 cm</b></div>
+      <div class="stat"><span>Volume of water</span><b id="wV">0.0 cm³</b></div>
+      <div class="stat"><span>In millilitres / litres</span><b id="wL">0 mL</b></div>
+      <div class="bar"><i id="wB"></i></div>
+      <p class="note" style="margin-bottom:0">Water volume = length × width × water height. 1 mL = 1 cm³, so a full box of 1128.5 cm³ holds about 1.13 litres.</p>
+    </div>
+  </div>
+</div></section>
+
+<!-- MODEL -->
+<section id="model"><div class="wrap">
+  <h2>Part 2: building the model</h2>
+  <p class="sub">From the flat sheet to a polynomial.</p>
+  <div class="grid g2">
+    <div class="card">
+      <h3 style="margin-top:0">1 · Dimensions in terms of x</h3>
+      <p>Cutting an x × x square from each corner of a 29.7 cm × 21 cm sheet uses x on each end of both sides.</p>
+      <div class="math">Length = 29.7 − 2x<br>Width = 21 − 2x<br>Height = x</div>
+      <h3>2 · Factored form</h3>
+      <div class="math big">V(x) = x(29.7 − 2x)(21 − 2x)</div>
+      <h3>3 · Standard form</h3>
+      <div class="math">(29.7 − 2x)(21 − 2x) = 623.7 − 59.4x − 42x + 4x² = 4x² − 101.4x + 623.7</div>
+      <div class="math big">V(x) = 4x³ − 101.4x² + 623.7x</div>
+      <h3>4 · Check the model</h3>
+      <div class="math">V(3) = 4(27) − 101.4(9) + 623.7(3)<br>= 108 − 912.6 + 1871.1 = <b>1066.5 cm³</b></div>
+      <p class="note">This matches the box we measured for x = 3. A real box can differ slightly because of measuring error, tape and fold thickness.</p>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">5 · Domain</h3>
+      <div class="math big">0 &lt; x &lt; 10.5</div>
+      <ul>
+        <li><b>x &gt; 0</b>: if x = 0 nothing is cut, so there are no walls and the “box” is the flat sheet (volume 0).</li>
+        <li><b>x &lt; 10.5</b>: the width 21 − 2x must be positive. At x = 10.5 the two cuts use up the whole 21 cm side and the base has width 0.</li>
+        <li>The length condition x &lt; 14.85 is weaker, so the width is what limits us.</li>
+      </ul>
+      <h3>6 · Features of V(x)</h3>
+      <table>
+        <tr><th>Feature</th><th>Answer</th></tr>
+        <tr><td>Degree</td><td>3 (cubic)</td></tr>
+        <tr><td>Leading coefficient</td><td>4 (positive)</td></tr>
+        <tr><td>End behavior</td><td>x → −∞: V → −∞<br>x → +∞: V → +∞</td></tr>
+        <tr><td>Zeros</td><td>x = 0, 10.5, 14.85</td></tr>
+      </table>
+      <ul>
+        <li><b>x = 0</b>: no cut, flat sheet, volume 0.</li>
+        <li><b>x = 10.5</b>: width becomes 0, so the box is a flat strip with volume 0.</li>
+        <li><b>x = 14.85</b>: the length would be 0, but this is outside the domain (the width is already negative), so it means nothing for a real box.</li>
+      </ul>
+    </div>
+  </div>
+</div></section>
+
+<!-- GRAPH -->
+<section id="graph"><div class="wrap">
+  <h2>Part 3: finding the best box</h2>
+  <p class="sub">Click or drag on the graph to move the cut size. The box in the lab above updates too.</p>
+  <canvas id="gr" height="420"></canvas>
+  <div class="row note" style="margin-top:8px"><span><b style="color:#1f5fa8">━</b> real boxes (domain)</span><span><b style="color:#999">┅</b> outside the domain</span><span><b style="color:#d9480f">●</b> measured test boxes</span><span><b style="color:#2b8a3e">●</b> V = 1000</span></div>
+  <div class="grid g3" style="margin-top:18px">
+    <div class="card"><h3 style="margin-top:0">Maximum</h3>
+      <p>Setting the slope to zero: V′(x) = 12x² − 202.8x + 623.7 = 0 gives x ≈ 4.0423.</p>
+      <div class="math">The best cut size is <b>4.04 cm</b>, giving a volume of <b>1128.50 cm³</b>.</div></div>
+    <div class="card"><h3 style="margin-top:0">Two boxes with 1000 cm³</h3>
+      <p>Solving x(29.7 − 2x)(21 − 2x) = 1000 gives <b>x ≈ 2.56 cm</b> and <b>x ≈ 5.71 cm</b>.</p>
+      <p class="note" style="margin-bottom:0">There are two answers because the volume rises to the peak and then falls, so the line V = 1000 crosses the curve once on each side. (The third root, 17.08, is outside the domain.)</p></div>
+    <div class="card"><h3 style="margin-top:0">Model vs real boxes</h3>
+      <p>The orange test-box points lie on the curve. The model fits real boxes closely, so we can trust it to choose the design.</p>
+      <p class="note" style="margin-bottom:0">Real boxes differ a little because of measuring error, folds and tape.</p></div>
+  </div>
+</div></section>
+
+<!-- DATA -->
+<section id="data"><div class="wrap">
+  <h2>Part 1: test box data</h2>
+  <p class="sub">Each test box was built from A4 paper. The table is calculated from the dimensions.</p>
+  <div class="grid g2">
+    <div class="card" style="overflow-x:auto"><table id="tbl"></table></div>
+    <div class="card">
+      <h3 style="margin-top:0">What the pattern shows</h3>
+      <ul>
+        <li>As x gets bigger the <b>height goes up</b> but the <b>base gets smaller</b>.</li>
+        <li>The volume rises, peaks, then falls. The best of our whole-number cuts was x = 4 cm (1128.4 cm³).</li>
+        <li>Because the volume increases to x = 4 and drops by x = 5, a value just above 4 could do even slightly better. The model says it is 4.04.</li>
+        <li>x cannot be 0 (nothing to fold) and cannot be 11 (the width would be 21 − 22 = −1 cm).</li>
+      </ul>
+    </div>
+  </div>
+</div></section>
+
+<!-- BUILD -->
+<section id="build"><div class="wrap">
+  <h2>Part 4: prototype and volume test</h2>
+  <p class="sub">The prototype is built to the optimal cut. Enter what you measured to compare it with the model.</p>
+  <div class="grid g2">
+    <div class="card">
+      <h3 style="margin-top:0">Design specification</h3>
+      <table>
+        <tr><th>Item</th><th>Value</th></tr>
+        <tr><td>Sheet</td><td>29.7 × 21 cm</td></tr>
+        <tr><td>Cut squares</td><td>4.04 × 4.04 cm</td></tr>
+        <tr><td>Length</td><td>21.62 cm</td></tr>
+        <tr><td>Width</td><td>12.92 cm</td></tr>
+        <tr><td>Height</td><td>4.04 cm</td></tr>
+        <tr><td>Predicted volume</td><td>1128.50 cm³</td></tr>
+      </table>
+      <p class="note">Tip for building: a ruler can measure 40.4 mm. Check that the fold line is the same distance from all four edges before you cut, or the walls will come out uneven.</p>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Percent error calculator</h3>
+      <div class="row">
+        <label>Length (cm) <input type="number" id="mL" step="0.1" placeholder="21.62"></label>
+        <label>Width (cm) <input type="number" id="mW" step="0.1" placeholder="12.92"></label>
+        <label>Height (cm) <input type="number" id="mH" step="0.1" placeholder="4.04"></label>
+      </div>
+      <p class="note" style="margin:8px 0">Use the height of the <b>shortest wall</b>, since the box can only hold water up to its lowest side.</p>
+      <label>Or rice/water test (mL) <input type="number" id="mV" step="1" placeholder="1128"></label>
+      <div class="math" id="err" style="margin-top:12px">Enter your measurements to see the result.</div>
+      <p class="note" style="margin-bottom:0">Percent error = |measured − 1128.50| ÷ 1128.50 × 100%.</p>
+    </div>
+  </div>
+</div></section>
+
+<!-- CHALLENGE -->
+<section id="challenge"><div class="wrap">
+  <h2>Challenge questions</h2>
+  <p class="sub">Tap each one to see the working.</p>
+  <details open><summary>1 · Find the maximum by testing values (no max feature)</summary>
+    <div style="overflow-x:auto"><table id="t1"></table></div>
+    <p>The volume increases up to 4.04 and decreases at 4.05, so the maximum to two decimal places is <b>x = 4.04 cm</b>, V ≈ 1128.50 cm³.</p>
+  </details>
+  <details><summary>2 · Best cut for a square sheet of side s</summary>
+    <p>For a square sheet, V(x) = x(s − 2x)². Write V = ¼ · (4x)(s − 2x)(s − 2x). The three factors add up to 4x + (s − 2x) + (s − 2x) = s, a constant. A product with a fixed sum is largest when the factors are equal (AM–GM), so 4x = s − 2x, which gives 6x = s:</p>
+    <div class="math big">x = s / 6</div>
+    <p>Check with calculus: V′ = (s − 2x)(s − 6x) = 0, so x = s/6 (x = s/2 gives zero volume), and V″ &lt; 0 there, so it is a maximum. The maximum volume is 2s³/27.</p>
+    <div class="row">Try it: sheet side s = <input type="number" id="sS" value="21" min="1" step="1"> cm
+    <span class="math" id="sOut" style="margin:0">–</span></div>
+  </details>
+  <details><summary>3 · Closed box with a lid</summary>
+    <p>Use a net with the base in the middle, four walls of height h and the lid attached to one wall. The 21 cm side gives 2h + 2w = 21, so w = 10.5 − h, and the length is 29.7 − 2h.</p>
+    <div class="math big">V(h) = h(29.7 − 2h)(10.5 − h) = 2h³ − 50.7h² + 311.85h</div>
+    <p>Since (10.5 − h) = ½(21 − 2h), this is exactly <b>half</b> of the open-box function. So the best cut is the same, <b>h ≈ 4.04 cm</b>, and the maximum volume is <b>≈ 564.25 cm³</b> (21.62 × 6.46 × 4.04 cm). The lid uses half the sheet, so it halves the volume.</p>
+  </details>
+  <details><summary>4 · Lowest cost per cm³</summary>
+    <p>Cost per tray = 0.5 AED (sheet) + 4 × 0.1 AED (tape) = <b>0.90 AED</b>, whatever the cut size. So the cost per cm³ is 0.9 / V(x), which is lowest when V(x) is largest:</p>
+    <div class="math">x ≈ 4.04 cm → 0.9 / 1128.50 ≈ <b>0.0008 AED per cm³</b><br>x = 1 cm → 0.9 / 526.3 ≈ 0.0017 AED per cm³</div>
+  </details>
+  <details><summary>5 · Average rate of change (why the maximum is between 3 and 5)</summary>
+    <div class="math">On [3, 4]: (1128.4 − 1066.5) / 1 = <b>+61.9</b> cm³ per cm<br>On [4, 5]: (1083.5 − 1128.4) / 1 = <b>−44.9</b> cm³ per cm</div>
+    <p>The volume was increasing on [3, 4] and decreasing on [4, 5]. The rate of change switches from positive to negative, so the peak lies between these two intervals, close to x = 4. A straight-line estimate of where the slope crosses zero gives x ≈ 4.08, close to the true 4.04.</p>
+  </details>
+</div></section>
+
+<!-- PITCH -->
+<section id="pitch"><div class="wrap">
+  <h2>Recommendation to the client</h2>
+  <p class="sub">What BoxWise Packaging Co. advises.</p>
+  <div class="card">
+    <div class="math big">Cut 4.04 cm squares → volume 1128.50 cm³ (about 1.13 L)</div>
+    <ul>
+      <li><b>Function:</b> V(x) = x(29.7 − 2x)(21 − 2x) = 4x³ − 101.4x² + 623.7x, domain 0 &lt; x &lt; 10.5.</li>
+      <li><b>Practical option:</b> a 4 cm cut gives 1128.4 cm³, a difference of less than 0.01%, and is far easier to measure with a ruler.</li>
+      <li><b>Real-world limits:</b> measuring and cutting errors, thickness of cardboard and tape, and rounded folds all make a real box a little different from the model.</li>
+      <li><b>Recommendation:</b> a tray holds about 1.13 L from this sheet. A slightly larger or squarer sheet would increase capacity (best cut = s/6 for a square). A lid halves the volume, so use a separate lid sheet.</li>
+    </ul>
+  </div>
+</div></section>
+
+<footer><div class="wrap">BoxWise Packaging Co. · Algebra 2 Polynomial Functions Project · All numbers on this page are calculated live from V(x) = x(29.7 − 2x)(21 − 2x).</div></footer>
+
+<script>
+(function(){
+"use strict";
+const SW=29.7, SH=21, S=16;
+const V=x=>x*(SW-2*x)*(SH-2*x);
+const XMAX=(202.8-Math.sqrt(202.8*202.8-4*12*623.7))/24, VMAX=V(XMAX);
+const $=id=>document.getElementById(id);
+const f=(n,d=2)=>Number(n).toFixed(d);
+const ease=p=>p<.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2;
+
+/* ---------- state ---------- */
+const st={x:4.04,cut:0,fold:0,fill:0,marks:false,step:0};
+
+/* ---------- build 3D parts ---------- */
+const sheet=$("sheet");
+sheet.style.width=SW*S+"px"; sheet.style.height=SH*S+"px";
+$("tilt").style.width=SW*S+"px"; $("tilt").style.height=SH*S+"px";
+const mk=(cls,parent)=>{const d=document.createElement("div");d.className=cls;(parent||sheet).appendChild(d);return d;};
+const base=mk("part base"), back=mk("part back"), front=mk("part front"), left=mk("part left"), right=mk("part right");
+const corn=[mk("part corn"),mk("part corn"),mk("part corn"),mk("part corn")];
+const wTop=mk("w wtop"), wB=mk("w"), wF=mk("w"), wL=mk("w"), wR=mk("w");
+const px=c=>c*S+"px";
+const place=(el,l,t,w,h)=>{el.style.left=px(l);el.style.top=px(t);el.style.width=px(w);el.style.height=px(h);};
+
+function render(){
+  const x=st.x, L=SW-2*x, W=SH-2*x, th=st.fold*90;
+  place(base,x,x,L,W);
+  place(back,x,0,L,x);        back.style.transform=`rotateX(${-th}deg)`;
+  place(front,x,SH-x,L,x);    front.style.transform=`rotateX(${th}deg)`;
+  place(left,0,x,x,W);        left.style.transform=`rotateY(${th}deg)`;
+  place(right,SW-x,x,x,W);    right.style.transform=`rotateY(${-th}deg)`;
+  const pos=[[0,0,-1,-1],[SW-x,0,1,-1],[0,SH-x,-1,1],[SW-x,SH-x,1,1]];
+  corn.forEach((c,i)=>{
+    const p=pos[i]; place(c,p[0],p[1],x,x);
+    c.style.transform=`translate(${p[2]*st.cut*90}px,${p[3]*st.cut*90}px) translateZ(${st.cut*40}px) rotateZ(${p[2]*p[3]*st.cut*40}deg)`;
+    c.style.opacity=1-Math.pow(st.cut,1.5);
+    c.style.display=st.cut>=0.999?"none":"block";
+  });
+  sheet.classList.toggle("marked",st.marks);
+  /* water */
+  const wh=st.fill*x*S, show=st.fill>0.001&&st.fold>=0.999;
+  sheet.classList.toggle("filling",show);
+  [wTop,wB,wF,wL,wR].forEach(e=>e.style.display=show?"block":"none");
+  if(show){
+    const bx=x*S, by=x*S, bw=L*S, bh=W*S, e=1.5;
+    Object.assign(wTop.style,{left:bx+e+"px",top:by+e+"px",width:bw-2*e+"px",height:bh-2*e+"px",transform:`translateZ(${wh}px)`});
+    Object.assign(wF.style,{left:bx+e+"px",top:by+bh-e+"px",width:bw-2*e+"px",height:wh+"px",transformOrigin:"50% 0",transform:"rotateX(90deg)"});
+    Object.assign(wB.style,{left:bx+e+"px",top:by+e-wh+"px",width:bw-2*e+"px",height:wh+"px",transformOrigin:"50% 100%",transform:"rotateX(-90deg)"});
+    Object.assign(wL.style,{left:bx+e-wh+"px",top:by+e+"px",width:wh+"px",height:bh-2*e+"px",transformOrigin:"100% 50%",transform:"rotateY(90deg)"});
+    Object.assign(wR.style,{left:bx+bw-e+"px",top:by+e+"px",width:wh+"px",height:bh-2*e+"px",transformOrigin:"0 50%",transform:"rotateY(-90deg)"});
+  }
+  /* readouts */
+  const v=V(x);
+  $("xval").textContent=f(x)+" cm";
+  $("dL").textContent=f(L)+" cm"; $("dW").textContent=f(W)+" cm"; $("dH").textContent=f(x)+" cm";
+  $("dV").textContent=f(v,1)+" cm³";
+  $("dP").textContent=f(v/VMAX*100,1)+"% of max";
+  $("calc").innerHTML=`V = x(29.7 − 2x)(21 − 2x)<br>V = ${f(x)} × ${f(L)} × ${f(W)}<br><b>V = ${f(v,1)} cm³</b>`;
+  const wv=st.fill*v;
+  $("wH").textContent=f(st.fill*x)+" cm";
+  $("wV").textContent=f(wv,1)+" cm³";
+  $("wL").textContent=f(wv,0)+" mL"+(wv>=1000?"  ("+f(wv/1000,2)+" L)":"");
+  $("wB").style.width=st.fill*100+"%";
+  drawGraph();
+}
+
+/* ---------- fit the 3D scene to the stage ---------- */
+function fit(){
+  const w=$("stage").clientWidth;
+  $("fit").style.setProperty("--k",Math.min(1,(w-30)/640));
+}
+window.addEventListener("resize",()=>{fit();drawGraph();});
+
+/* ---------- animation ---------- */
+let token=0;
+const say=t=>$("say").textContent=t;
+function setStep(n){
+  st.step=n;
+  document.querySelectorAll("#pills .pill").forEach(p=>{
+    const s=+p.dataset.s; p.classList.toggle("on",s===n); p.classList.toggle("done",s<n);
+  });
+}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function tween(ms,fn,my){
+  return new Promise(res=>{
+    const t0=performance.now();
+    (function fr(t){
+      if(my!==token){res(false);return;}
+      const p=Math.min(1,(t-t0)/ms); fn(ease(p)); render();
+      if(p<1) requestAnimationFrame(fr); else res(true);
+    })(t0);
+  });
+}
+function resetState(){
+  token++; st.cut=0;st.fold=0;st.fill=0;st.marks=false;setStep(0);
+  say("Press ▶ Play to start the animation."); render();
+}
+async function play(){
+  const my=++token; st.cut=0;st.fold=0;st.fill=0;st.marks=false;setStep(0);
+  say("We start with one flat A4 sheet: 29.7 cm × 21 cm."); render();
+  await sleep(1300); if(my!==token)return;
+  setStep(1); st.marks=true; render();
+  say(`Mark ${f(st.x)} cm in from every edge. Blue dashes are fold lines, red squares are the corners.`);
+  await sleep(2200); if(my!==token)return;
+  setStep(2); say("Cut out the four corner squares.");
+  if(!await tween(1500,p=>st.cut=p,my))return;
+  await sleep(500); if(my!==token)return;
+  setStep(3); say("Fold the four sides up along the dashed lines and tape the corners.");
+  if(!await tween(2600,p=>st.fold=p,my))return;
+  await sleep(600); if(my!==token)return;
+  setStep(4); say("Now fill it with water to test the volume…");
+  if(!await tween(5200,p=>st.fill=p,my))return;
+  setStep(5);
+  say(`Full! Volume = ${f(st.x)} × ${f(SW-2*st.x)} × ${f(SH-2*st.x)} = ${f(V(st.x),1)} cm³ (≈ ${f(V(st.x)/1000,2)} litres).`);
+}
+function finish(){
+  token++; st.cut=1;st.fold=1;st.fill=1;st.marks=false;setStep(5);
+  say(`Finished box: ${f(V(st.x),1)} cm³ (≈ ${f(V(st.x)/1000,2)} litres).`); render();
+}
+$("play").onclick=play; $("reset").onclick=resetState; $("done").onclick=finish;
+
+/* ---------- slider / chips ---------- */
+function setX(v){
+  st.x=Math.max(.5,Math.min(10.4,v)); $("xs").value=st.x; render();
+  if(st.step===5) say(`Finished box: ${f(V(st.x),1)} cm³ (≈ ${f(V(st.x)/1000,2)} litres).`);
+}
+$("xs").addEventListener("input",e=>setX(+e.target.value));
+$("best").onclick=()=>setX(+XMAX.toFixed(2));
+document.querySelectorAll(".chip[data-x]").forEach(b=>b.onclick=()=>setX(+b.dataset.x));
+
+/* ---------- graph ---------- */
+const cv=$("gr"), ctx=cv.getContext("2d");
+const GX0=-1.5, GX1=16, GY0=-450, GY1=1400;
+let gm={l:56,r:16,t:18,b:44};
+function drawGraph(){
+  const dpr=window.devicePixelRatio||1, cssW=cv.clientWidth, cssH=420;
+  if(!cssW) return;
+  if(cv.width!==Math.round(cssW*dpr)){cv.width=Math.round(cssW*dpr);cv.height=cssH*dpr;}
+  ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,cssW,cssH);
+  const X=x=>gm.l+(x-GX0)/(GX1-GX0)*(cssW-gm.l-gm.r);
+  const Y=y=>cssH-gm.b-(y-GY0)/(GY1-GY0)*(cssH-gm.t-gm.b);
+  ctx.font="12px system-ui,sans-serif"; ctx.textAlign="center"; ctx.fillStyle="#5b6472"; ctx.strokeStyle="#eee"; ctx.lineWidth=1;
+  for(let x=0;x<=16;x+=2){ctx.beginPath();ctx.moveTo(X(x),gm.t);ctx.lineTo(X(x),cssH-gm.b);ctx.stroke();ctx.fillText(x,X(x),cssH-gm.b+16);}
+  ctx.textAlign="right";
+  for(let y=-400;y<=1400;y+=200){ctx.beginPath();ctx.moveTo(gm.l,Y(y));ctx.lineTo(cssW-gm.r,Y(y));ctx.stroke();ctx.fillText(y,gm.l-6,Y(y)+4);}
+  ctx.strokeStyle="#222";ctx.lineWidth=1.3;
+  ctx.beginPath();ctx.moveTo(gm.l,Y(0));ctx.lineTo(cssW-gm.r,Y(0));ctx.moveTo(X(0),gm.t);ctx.lineTo(X(0),cssH-gm.b);ctx.stroke();
+  ctx.fillStyle="#222";ctx.textAlign="center";ctx.fillText("Cut size x (cm)",(gm.l+cssW-gm.r)/2,cssH-6);
+  ctx.save();ctx.translate(14,(gm.t+cssH-gm.b)/2);ctx.rotate(-Math.PI/2);ctx.fillText("Volume V (cm³)",0,0);ctx.restore();
+  const clip=()=>{ctx.beginPath();ctx.rect(gm.l,gm.t,cssW-gm.l-gm.r,cssH-gm.t-gm.b);ctx.clip();};
+  const curve=(a,b)=>{ctx.beginPath();for(let x=a;x<=b+1e-9;x+=.05){x===a?ctx.moveTo(X(x),Y(V(x))):ctx.lineTo(X(x),Y(V(x)));}ctx.stroke();};
+  ctx.save();clip();
+  ctx.setLineDash([5,5]);ctx.strokeStyle="#9a9a9a";ctx.lineWidth=1.6;curve(GX0,0);curve(10.5,GX1);ctx.setLineDash([]);
+  ctx.strokeStyle="#1f5fa8";ctx.lineWidth=3;curve(0,10.5);
+  /* V = 1000 */
+  ctx.strokeStyle="#2b8a3e";ctx.setLineDash([3,4]);ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(gm.l,Y(1000));ctx.lineTo(cssW-gm.r,Y(1000));ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle="#2b8a3e";[2.5641,5.7096].forEach(x=>{ctx.beginPath();ctx.arc(X(x),Y(1000),4.5,0,7);ctx.fill();});
+  /* data */
+  ctx.fillStyle="#d9480f";for(let k=1;k<=7;k++){ctx.beginPath();ctx.arc(X(k),Y(V(k)),4,0,7);ctx.fill();}
+  /* max */
+  ctx.fillStyle="#111";ctx.beginPath();ctx.arc(X(XMAX),Y(VMAX),6,0,7);ctx.fill();
+  ctx.restore();
+  ctx.fillStyle="#111";ctx.textAlign="left";ctx.font="bold 12px system-ui,sans-serif";
+  ctx.fillText(`Max (${f(XMAX)}, ${f(VMAX)})`,X(XMAX)+10,Y(VMAX)-10);
+  ctx.fillStyle="#2b8a3e";ctx.font="12px system-ui,sans-serif";ctx.fillText("V = 1000",cssW-gm.r-62,Y(1000)-6);
+  /* current x */
+  const cx=X(st.x), cy=Y(V(st.x));
+  ctx.strokeStyle="#d03a2f";ctx.lineWidth=1.5;ctx.setLineDash([4,3]);
+  ctx.beginPath();ctx.moveTo(cx,Y(0));ctx.lineTo(cx,cy);ctx.moveTo(gm.l,cy);ctx.lineTo(cx,cy);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle="#d03a2f";ctx.beginPath();ctx.arc(cx,cy,7,0,7);ctx.fill();ctx.strokeStyle="#fff";ctx.lineWidth=2;ctx.stroke();
+  const lab=`x = ${f(st.x)}, V = ${f(V(st.x),1)}`; ctx.font="bold 12px system-ui,sans-serif";
+  const tw=ctx.measureText(lab).width+14, lx=Math.min(Math.max(cx-tw/2,gm.l),cssW-gm.r-tw), ly=cy<90?cy+14:cy-32;
+  ctx.fillStyle="#fff";ctx.strokeStyle="#d03a2f";ctx.lineWidth=1;ctx.beginPath();ctx.roundRect?ctx.roundRect(lx,ly,tw,20,6):ctx.rect(lx,ly,tw,20);ctx.fill();ctx.stroke();
+  ctx.fillStyle="#d03a2f";ctx.textAlign="left";ctx.fillText(lab,lx+7,ly+14);
+  cv._map={X,cssW};
+}
+function pick(e){
+  const r=cv.getBoundingClientRect(), mx=e.clientX-r.left;
+  const x=GX0+(mx-gm.l)/(r.width-gm.l-gm.r)*(GX1-GX0);
+  setX(+x.toFixed(2));
+}
+let drag=false;
+cv.addEventListener("pointerdown",e=>{drag=true;cv.setPointerCapture(e.pointerId);pick(e);});
+cv.addEventListener("pointermove",e=>{if(drag)pick(e);});
+cv.addEventListener("pointerup",()=>drag=false);
+
+/* ---------- tables ---------- */
+(function(){
+  let h="<tr><th>Cut x (cm)</th><th>Length</th><th>Width</th><th>Height</th><th>Volume (cm³)</th></tr>";
+  for(let k=1;k<=7;k++) h+=`<tr${k===4?' class="best"':""}><td>${k}</td><td>${f(SW-2*k,1)}</td><td>${f(SH-2*k,0)}</td><td>${k}</td><td>${f(V(k),1)}</td></tr>`;
+  $("tbl").innerHTML=h;
+  let t="<tr><th>x</th>",u="<tr><td>V(x)</td>";
+  [3.5,4,4.03,4.04,4.05,4.1,4.5].forEach(x=>{t+=`<th>${x}</th>`;u+=`<td>${f(V(x),x>4&&x<4.1?3:2)}</td>`;});
+  $("t1").innerHTML=t+"</tr>"+u+"</tr>";
+})();
+
+/* ---------- challenge 2 calculator ---------- */
+function sq(){const s=+$("sS").value||0;$("sOut").innerHTML=`best x = s/6 = <b>${f(s/6)} cm</b> · max V = 2s³/27 = <b>${f(2*s*s*s/27,1)} cm³</b>`;}
+$("sS").addEventListener("input",sq); sq();
+
+/* ---------- percent error ---------- */
+function err(){
+  const L=+$("mL").value,W=+$("mW").value,H=+$("mH").value,Vm=+$("mV").value;
+  let out=[];
+  if(L&&W&&H){const v=L*W*H;out.push(`Measured size: ${f(L)} × ${f(W)} × ${f(H)} = <b>${f(v,1)} cm³</b><br>Percent error: <b>${f(Math.abs(v-VMAX)/VMAX*100,2)}%</b>`);}
+  if(Vm){out.push(`Water/rice test: <b>${f(Vm,0)} mL</b><br>Percent error: <b>${f(Math.abs(Vm-VMAX)/VMAX*100,2)}%</b>`);}
+  $("err").innerHTML=out.length?out.join("<hr style='border:0;border-top:1px dashed #d8cdb7'>"):"Enter your measurements to see the result.";
+}
+["mL","mW","mH","mV"].forEach(i=>$(i).addEventListener("input",err));
+
+/* ---------- init ---------- */
+fit(); render();
+/* start in the finished-flat state; auto-play when the lab scrolls into view */
+if("IntersectionObserver" in window){
+  const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){io.disconnect();setTimeout(play,500);}});},{threshold:.5});
+  io.observe($("stage"));
+}
+})();
+</script>
+</body>
+</html>
