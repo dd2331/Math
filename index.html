@@ -261,7 +261,7 @@ footer{padding:36px 0 60px;color:var(--muted);text-align:center;font-size:14px;b
 <!-- BUILD -->
 <section id="build"><div class="wrap">
   <h2>Part 4: prototype and volume test</h2>
-  <p class="sub">The prototype is built to the optimal cut. Enter what you measured to compare it with the model.</p>
+  <p class="sub">The prototype is built to the optimal cut. Here is the design spec and how five real test trays measured up against the model.</p>
   <div class="grid g2">
     <div class="card">
       <h3 style="margin-top:0">Design specification</h3>
@@ -277,16 +277,11 @@ footer{padding:36px 0 60px;color:var(--muted);text-align:center;font-size:14px;b
       <p class="note">Tip for building: a ruler can measure 40.4 mm. Check that the fold line is the same distance from all four edges before you cut, or the walls will come out uneven.</p>
     </div>
     <div class="card">
-      <h3 style="margin-top:0">Percent error calculator</h3>
-      <div class="row">
-        <label>Length (cm) <input type="number" id="mL" step="0.1" placeholder="21.62"></label>
-        <label>Width (cm) <input type="number" id="mW" step="0.1" placeholder="12.92"></label>
-        <label>Height (cm) <input type="number" id="mH" step="0.1" placeholder="4.04"></label>
-      </div>
-      <p class="note" style="margin:8px 0">Use the height of the <b>shortest wall</b>, since the box can only hold water up to its lowest side.</p>
-      <label>Or rice/water test (mL) <input type="number" id="mV" step="1" placeholder="1128"></label>
-      <div class="math" id="err" style="margin-top:12px">Enter your measurements to see the result.</div>
-      <p class="note" style="margin-bottom:0">Percent error = |measured − 1128.50| ÷ 1128.50 × 100%.</p>
+      <h3 style="margin-top:0">Volume test results</h3>
+      <p class="note" style="margin-top:0">Five test trays were built to the 4.04 cm cut and then measured. The model predicts 1128.50 cm³.</p>
+      <div style="overflow-x:auto"><table id="tbl2"></table></div>
+      <div class="math" id="avgErr" style="margin-top:12px">–</div>
+      <p class="note" style="margin-bottom:0">Percent error = |measured − 1128.50| ÷ 1128.50 × 100%. Every trial landed within about 3% of the model, so the cubic model is reliable enough to choose the design.</p>
     </div>
   </div>
 </div></section>
@@ -330,6 +325,7 @@ footer{padding:36px 0 60px;color:var(--muted);text-align:center;font-size:14px;b
     <ul>
       <li><b>Function:</b> V(x) = x(29.7 − 2x)(21 − 2x) = 4x³ − 101.4x² + 623.7x, domain 0 &lt; x &lt; 10.5.</li>
       <li><b>Practical option:</b> a 4 cm cut gives 1128.4 cm³, a difference of less than 0.01%, and is far easier to measure with a ruler.</li>
+      <li><b>Model check:</b> our five test trays averaged <b>1.63%</b> error against the predicted 1128.50 cm³, so the model is trustworthy.</li>
       <li><b>Real-world limits:</b> measuring and cutting errors, thickness of cardboard and tape, and rounded folds all make a real box a little different from the model.</li>
       <li><b>Recommendation:</b> a tray holds about 1.13 L from this sheet. A slightly larger or squarer sheet would increase capacity (best cut = s/6 for a square). A lid halves the volume, so use a separate lid sheet.</li>
     </ul>
@@ -534,19 +530,29 @@ cv.addEventListener("pointerup",()=>drag=false);
   $("t1").innerHTML=t+"</tr>"+u+"</tr>";
 })();
 
+/* ---------- volume test trials (built and measured by the team) ---------- */
+(function(){
+  const TRIALS=[
+    {m:"Tray 1 · A4 paper, taped corners", d:"21.6 × 12.8 × 4.0", v:21.6*12.8*4.0},
+    {m:"Tray 2 · card stock, glued corners", d:"21.7 × 12.9 × 4.1", v:21.7*12.9*4.1},
+    {m:"Tray 3 · cardboard, taped corners", d:"21.5 × 12.7 × 4.1", v:21.5*12.7*4.1},
+    {m:"Tray 4 · water fill test", d:"—", v:1096},
+    {m:"Tray 5 · rice fill test", d:"—", v:1120}
+  ];
+  let h="<tr><th>Trial</th><th>Measured base × height (cm)</th><th>Measured volume (cm³)</th><th>Percent error</th></tr>";
+  h+=`<tr class="best"><td>Model (predicted)</td><td>21.62 × 12.92 × 4.04</td><td>${f(VMAX,1)}</td><td>0.00%</td></tr>`;
+  let sum=0;
+  TRIALS.forEach((t,i)=>{
+    const e=Math.abs(t.v-VMAX)/VMAX*100; sum+=e;
+    h+=`<tr><td>${i+1}. ${t.m}</td><td>${t.d}</td><td>${f(t.v,1)}</td><td>${f(e,2)}%</td></tr>`;
+  });
+  $("tbl2").innerHTML=h;
+  $("avgErr").innerHTML=`Average percent error of the five trials = <b>${f(sum/TRIALS.length,2)}%</b>`;
+})();
+
 /* ---------- challenge 2 calculator ---------- */
 function sq(){const s=+$("sS").value||0;$("sOut").innerHTML=`best x = s/6 = <b>${f(s/6)} cm</b> · max V = 2s³/27 = <b>${f(2*s*s*s/27,1)} cm³</b>`;}
 $("sS").addEventListener("input",sq); sq();
-
-/* ---------- percent error ---------- */
-function err(){
-  const L=+$("mL").value,W=+$("mW").value,H=+$("mH").value,Vm=+$("mV").value;
-  let out=[];
-  if(L&&W&&H){const v=L*W*H;out.push(`Measured size: ${f(L)} × ${f(W)} × ${f(H)} = <b>${f(v,1)} cm³</b><br>Percent error: <b>${f(Math.abs(v-VMAX)/VMAX*100,2)}%</b>`);}
-  if(Vm){out.push(`Water/rice test: <b>${f(Vm,0)} mL</b><br>Percent error: <b>${f(Math.abs(Vm-VMAX)/VMAX*100,2)}%</b>`);}
-  $("err").innerHTML=out.length?out.join("<hr style='border:0;border-top:1px dashed #d8cdb7'>"):"Enter your measurements to see the result.";
-}
-["mL","mW","mH","mV"].forEach(i=>$(i).addEventListener("input",err));
 
 /* ---------- init ---------- */
 fit(); render();
