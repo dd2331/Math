@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>StrideCraft Footwear Co. | The Box Optimization Project</title>
-<meta name="description" content="How a cubic polynomial finds the largest open-top tray that can be made from one A4 sheet for shipping sneakers.">
+<title>BoxWise Packaging Co. | The Box Optimization Project</title>
+<meta name="description" content="How a cubic polynomial finds the largest open-top box that can be made from one A4 sheet.">
 <style>
 :root{
   --bg:#faf6ef; --card:#ffffff; --ink:#1f2937; --muted:#5b6472; --line:#e6dccb;
@@ -177,16 +177,16 @@ footer{padding:36px 0 60px;color:var(--muted);text-align:center;font-size:14px;b
 <body>
 
 <nav><div class="wrap">
-  <b>👟 StrideCraft Footwear Co.</b>
+  <b>📦 BoxWise Packaging Co.</b>
   <a href="#why">Why</a><a href="#lab">Box lab</a><a href="#model">The model</a>
   <a href="#graph">Graph</a><a href="#data">Data</a><a href="#build">Prototype</a><a href="#challenge">Challenges</a><a href="#pitch">Pitch</a>
 </div></nav>
 
 <header class="hero"><div class="wrap">
   <span class="badge">ALGEBRA 2 · POLYNOMIAL FUNCTIONS PROJECT</span>
-  <h1>Which square should we cut to build the <span>biggest shoe tray?</span></h1>
+  <h1>Which square should we cut to build the <span>biggest box?</span></h1>
   <p class="lead">One A4 sheet. Four equal corner squares. One cubic polynomial that tells us exactly how big to cut. This site walks through the whole design, from the client brief to the final prototype.</p>
-  <p class="note">Presented by <b>StrideCraft Footwear Co.</b> &nbsp;·&nbsp; Team: <i>Chaitanya, Elias, Zaid, Jan, Jad</i></p>
+  <p class="note">Presented by <b>BoxWise Packaging Co.</b> &nbsp;·&nbsp; Team: <i>Chaitanya, Elias, Zaid, Jan, Jad</i></p>
 </div></header>
 
 <!-- WHY -->
@@ -195,9 +195,9 @@ footer{padding:36px 0 60px;color:var(--muted);text-align:center;font-size:14px;b
   <p class="sub">The client brief, the question and what we need to prove.</p>
   <div class="grid g2">
     <div>
-      <div class="quote">“We ship our sneakers in open-top trays made by cutting equal squares from each corner of an A4 sheet and folding up the sides. We want the tray with the largest possible volume. Tell us exactly what size squares to cut, prove it is the best choice, and send us a working prototype.”</div>
+      <div class="quote">“We ship our product in open-top trays made by cutting equal squares from each corner of an A4 sheet and folding up the sides. We want the tray with the largest possible volume. Tell us exactly what size squares to cut, prove it is the best choice, and send us a working prototype.”</div>
       <h3>The real-world problem</h3>
-      <p>Shoe companies pay for material, shipping space and storage. A tray that holds more sneakers from the same sheet of cardboard saves money on every single shipment. But cutting a bigger square makes the walls taller <i>and</i> the base smaller, so it is not obvious where the best answer is.</p>
+      <p>Companies pay for material, shipping space and storage. A tray that holds more product from the same sheet of cardboard saves money on every single shipment. But cutting a bigger square makes the walls taller <i>and</i> the base smaller, so it is not obvious where the best answer is.</p>
     </div>
     <div class="card">
       <h3 style="margin-top:0">What we need to do</h3>
@@ -382,10 +382,15 @@ footer{padding:36px 0 60px;color:var(--muted);text-align:center;font-size:14px;b
     <div class="row">Try it: sheet side s = <input type="number" id="sS" value="21" min="1" step="1"> cm
     <span class="math" id="sOut" style="margin:0">–</span></div>
   </details>
-  <details><summary>3 · Closed box with a lid</summary>
-    <p>Use a net with the base in the middle, four walls of height h and the lid attached to one wall. The 21 cm side gives 2h + 2w = 21, so w = 10.5 − h, and the length is 29.7 − 2h.</p>
-    <div class="math big">V(h) = h(29.7 − 2h)(10.5 − h) = 2h³ − 50.7h² + 311.85h</div>
-    <p>Since (10.5 − h) = ½(21 − 2h), this is exactly <b>half</b> of the open-box function. So the best cut is the same, <b>h ≈ 4.04 cm</b>, and the maximum volume is <b>≈ 564.25 cm³</b> (21.62 × 6.46 × 4.04 cm). The lid uses half the sheet, so it halves the volume.</p>
+  <details><summary>3 · Designing the lid</summary>
+    <p>To make a lid that fits over the box, we add 0.5 cm of clearance to the base's length and width. The height of the lid must be 1/5th of the cut size (x/5).</p>
+    <p>Base dimensions: L = 29.7 − 2x, W = 21 − 2x.<br>
+    Lid dimensions: L = 30.2 − 2x, W = 21.5 − 2x, H = x/5.</p>
+    <div class="math big">V(x) = (x/5)(30.2 − 2x)(21.5 − 2x)</div>
+    <p>Expanding: V(x) = 0.2x(4x² − 103.4x + 649.3) = <b>0.8x³ − 20.68x² + 129.86x</b>.</p>
+    <p>Taking the derivative and setting it to zero: V′(x) = 2.4x² − 41.36x + 129.86 = 0.</p>
+    <p>Using the quadratic formula, the valid root is <b>x ≈ 4.13 cm</b> (the other root, 13.1, is outside the domain).</p>
+    <p>So the optimal lid height is 4.13/5 ≈ <b>0.83 cm</b>, and the lid volume is about <b>240 cm³</b>.</p>
   </details>
   <details><summary>4 · Lowest cost per cm³</summary>
     <p>Cost per tray = 0.5 AED (sheet) + 4 × 0.1 AED (tape) = <b>0.90 AED</b>, whatever the cut size. So the cost per cm³ is 0.9 / V(x), which is lowest when V(x) is largest:</p>
@@ -400,20 +405,21 @@ footer{padding:36px 0 60px;color:var(--muted);text-align:center;font-size:14px;b
 <!-- PITCH -->
 <section id="pitch"><div class="wrap">
   <h2>Recommendation to the client</h2>
-  <p class="sub">What StrideCraft Footwear Co. advises.</p>
+  <p class="sub">What BoxWise Packaging Co. advises.</p>
   <div class="card">
     <div class="math big">Cut 4.04 cm squares → volume 1128.50 cm³ (about 1.13 L)</div>
     <ul>
       <li><b>Function:</b> V(x) = x(29.7 − 2x)(21 − 2x) = 4x³ − 101.4x² + 623.7x, domain 0 &lt; x &lt; 10.5.</li>
       <li><b>Practical option:</b> a 4 cm cut gives 1128.4 cm³, a difference of less than 0.01%, and is far easier to measure with a ruler.</li>
+      <li><b>Lid addition:</b> By adding 0.5 cm clearance and setting the lid height to x/5, the optimal lid cut is 4.13 cm, giving a lid volume of 240 cm³.</li>
       <li><b>Model check:</b> our five test trays averaged <b>1.63%</b> error against the predicted 1128.50 cm³, so the model is trustworthy.</li>
       <li><b>Real-world limits:</b> measuring and cutting errors, thickness of cardboard and tape, and rounded folds all make a real box a little different from the model.</li>
-      <li><b>Recommendation:</b> a tray holds about 1.13 L from this sheet — enough for a pair of sneakers. A slightly larger or squarer sheet would increase capacity (best cut = s/6 for a square). A lid halves the volume, so use a separate lid sheet.</li>
+      <li><b>Recommendation:</b> A tray from this sheet holds about 1.13 L. A slightly larger or squarer sheet would increase capacity (best cut = s/6 for a square). We recommend cutting the optimal 4.04 cm for the box and 4.13 cm for its custom lid.</li>
     </ul>
   </div>
 </div></section>
 
-<footer><div class="wrap">StrideCraft Footwear Co. · Algebra 2 Polynomial Functions Project · All numbers on this page are calculated live from V(x) = x(29.7 − 2x)(21 − 2x).</div></footer>
+<footer><div class="wrap">BoxWise Packaging Co. · Algebra 2 Polynomial Functions Project · All numbers on this page are calculated live from V(x) = x(29.7 − 2x)(21 − 2x).</div></footer>
 
 <script>
 (function(){
