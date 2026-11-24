@@ -55,33 +55,84 @@ tr.best td{background:#e8f4ea;font-weight:700}
 .lab{display:grid;grid-template-columns:1.5fr 1fr;gap:18px}
 @media(max-width:900px){.lab{grid-template-columns:1fr}}
 .stage{perspective:1500px;height:440px;border-radius:16px;border:1px solid var(--line);
-  background:radial-gradient(ellipse at 50% 85%,#ffffff 0%,#f3ead9 55%,#e9dcc3 100%);
+  background:radial-gradient(ellipse at 50% 88%,#ffffff 0%,#f4ecdc 52%,#e7d9be 100%);
   display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
 .fit{transform-style:preserve-3d;transform:scale(var(--k,1))}
 .tilt{position:relative;transform-style:preserve-3d;transform:rotateX(58deg) rotateZ(-35deg)}
 .sheet{position:relative;transform-style:preserve-3d}
 .part{position:absolute;transform-style:preserve-3d;backface-visibility:visible;
-  background:repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 3px,rgba(0,0,0,.03) 3px 6px),linear-gradient(135deg,#dcb783,#c59c63);
-  border:2px solid rgba(100,66,28,.28);transition:border-color .5s,opacity .3s}
+  background:
+    repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 3px,rgba(0,0,0,.03) 3px 6px),
+    repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0 2px,rgba(0,0,0,.02) 2px 4px),
+    linear-gradient(135deg,#dcb783,#c59c63);
+  border:2px solid rgba(100,66,28,.28);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.22), inset 0 -8px 14px rgba(90,58,20,.07);
+  transition:border-color .5s,opacity .3s}
 .back{transform-origin:50% 100%}.front{transform-origin:50% 0}
 .left{transform-origin:100% 50%}.right{transform-origin:0 50%}
 .corn{background:linear-gradient(135deg,#ecd9ba,#e0c799)}
 .sheet.marked .base,.sheet.marked .back,.sheet.marked .front,.sheet.marked .left,.sheet.marked .right{border:2px dashed var(--blue)}
-.sheet.marked .corn{border:2px solid var(--red)}
+.sheet.marked .corn{border:2px solid var(--red);animation:cornPulse 1.3s ease-in-out infinite}
+@keyframes cornPulse{
+  0%,100%{box-shadow:0 0 0 rgba(208,58,47,0)}
+  50%{box-shadow:0 0 16px rgba(208,58,47,.8)}
+}
 .sheet.filling .back,.sheet.filling .front,.sheet.filling .left,.sheet.filling .right{opacity:.72}
-.w{position:absolute;background:var(--water);border:1px solid rgba(255,255,255,.55);display:none;backface-visibility:visible}
-.wtop{background:rgba(70,160,240,.5)}
+
+/* soft ground shadow */
+.shadow{position:absolute;border-radius:50%;pointer-events:none;opacity:0;
+  background:radial-gradient(closest-side,rgba(80,52,18,.34),rgba(80,52,18,.10) 55%,rgba(80,52,18,0) 78%);
+  transform:translateZ(-2px)}
+
+/* marking outline */
+.markoutline{position:absolute;border:2px dashed #1f5fa8;border-radius:3px;pointer-events:none;opacity:0;
+  transform:translateZ(.6px)}
+.sheet.marked .markoutline{animation:drawOutline .9s ease forwards}
+@keyframes drawOutline{
+  from{opacity:0;transform:translateZ(.6px) scale(.9)}
+  to{opacity:1;transform:translateZ(.6px) scale(1)}
+}
+
+/* water */
+.w{position:absolute;display:none;backface-visibility:visible;
+  background:linear-gradient(180deg,rgba(86,176,246,.68),rgba(38,116,206,.58));
+  border:1px solid rgba(255,255,255,.55);
+  box-shadow:inset 0 0 12px rgba(255,255,255,.25)}
+.wtop{background:
+    linear-gradient(115deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.45) 22%,rgba(255,255,255,0) 44%),
+    linear-gradient(180deg,rgba(120,196,250,.72),rgba(58,142,226,.6));
+  background-size:250% 100%,100% 100%;
+  animation:shimmer 3.2s linear infinite;
+  box-shadow:inset 0 0 18px rgba(255,255,255,.35)}
+@keyframes shimmer{0%{background-position:150% 0,0 0}100%{background-position:-50% 0,0 0}}
+
 .caption{position:absolute;left:14px;right:14px;top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;z-index:5}
 .pill{font-size:12px;font-weight:700;padding:4px 10px;border-radius:99px;background:#fff;border:1px solid var(--line);color:var(--muted);transition:.3s}
-.pill.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.pill.on{background:var(--ink);color:#fff;border-color:var(--ink);animation:pop .35s ease}
 .pill.done{background:#e8f4ea;color:var(--green);border-color:#bfe0c6}
-.say{position:absolute;left:14px;right:14px;bottom:12px;background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-weight:600;z-index:5;min-height:46px}
+.pill.done::after{content:" ✓"}
+@keyframes pop{0%{transform:scale(.88)}60%{transform:scale(1.1)}100%{transform:scale(1)}}
+
+.progress{position:absolute;left:0;right:0;top:0;height:3px;z-index:6;background:rgba(0,0,0,.05)}
+.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,#b98a54,#1f5fa8);transition:width .45s ease}
+
+.say{position:absolute;left:14px;right:14px;bottom:12px;background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-weight:600;z-index:5;min-height:46px}
+.say.pop{animation:sayIn .45s ease}
+@keyframes sayIn{from{opacity:.15;transform:translateY(7px)}to{opacity:1;transform:none}}
+
+/* gentle camera drift when the box is finished */
+.stage.done .tilt{animation:drift 8s ease-in-out infinite}
+@keyframes drift{
+  0%,100%{transform:rotateX(58deg) rotateZ(-35deg)}
+  50%{transform:rotateX(56deg) rotateZ(-33.4deg)}
+}
+
 .panel .stat{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--line)}
 .panel .stat:last-child{border:0}
 .panel .stat b{font-variant-numeric:tabular-nums}
 .big{font-size:34px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .bar{height:14px;background:#e9eef5;border-radius:99px;overflow:hidden;margin-top:6px}
-.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3d9be9,#1f5fa8)}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3d9be9,#1f5fa8);transition:width .15s linear}
 input[type=range]{width:100%;accent-color:var(--blue)}
 input[type=number]{width:110px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font:inherit}
 canvas{width:100%;display:block;background:#fff;border:1px solid var(--line);border-radius:14px;touch-action:none;cursor:crosshair}
@@ -92,6 +143,10 @@ summary{cursor:pointer;font-weight:700}
 .chip:hover{border-color:var(--blue)}
 footer{padding:36px 0 60px;color:var(--muted);text-align:center;font-size:14px;border-top:1px solid var(--line)}
 .ok{color:var(--green);font-weight:700}
+
+@media (prefers-reduced-motion: reduce){
+  .stage.done .tilt,.wtop,.sheet.marked .corn{animation:none!important}
+}
 </style>
 </head>
 <body>
@@ -141,6 +196,7 @@ footer{padding:36px 0 60px;color:var(--muted);text-align:center;font-size:14px;b
   <div class="lab">
     <div>
       <div class="stage" id="stage">
+        <div class="progress"><i id="prog"></i></div>
         <div class="caption" id="pills">
           <span class="pill" data-s="1">1 Mark</span><span class="pill" data-s="2">2 Cut</span>
           <span class="pill" data-s="3">3 Fold</span><span class="pill" data-s="4">4 Fill with water</span>
@@ -343,6 +399,7 @@ const XMAX=(202.8-Math.sqrt(202.8*202.8-4*12*623.7))/24, VMAX=V(XMAX);
 const $=id=>document.getElementById(id);
 const f=(n,d=2)=>Number(n).toFixed(d);
 const ease=p=>p<.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2;
+const easeOutBack=p=>{const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(p-1,3)+c1*Math.pow(p-1,2);};
 
 /* ---------- state ---------- */
 const st={x:4.04,cut:0,fold:0,fill:0,marks:false,step:0};
@@ -352,7 +409,12 @@ const sheet=$("sheet");
 sheet.style.width=SW*S+"px"; sheet.style.height=SH*S+"px";
 $("tilt").style.width=SW*S+"px"; $("tilt").style.height=SH*S+"px";
 const mk=(cls,parent)=>{const d=document.createElement("div");d.className=cls;(parent||sheet).appendChild(d);return d;};
+
+/* soft shadow goes first so it sits behind everything */
+const shadow=mk("shadow");
+
 const base=mk("part base"), back=mk("part back"), front=mk("part front"), left=mk("part left"), right=mk("part right");
+const markOutline=mk("markoutline");
 const corn=[mk("part corn"),mk("part corn"),mk("part corn"),mk("part corn")];
 const wTop=mk("w wtop"), wB=mk("w"), wF=mk("w"), wL=mk("w"), wR=mk("w");
 const px=c=>c*S+"px";
@@ -365,14 +427,35 @@ function render(){
   place(front,x,SH-x,L,x);    front.style.transform=`rotateX(${th}deg)`;
   place(left,0,x,x,W);        left.style.transform=`rotateY(${th}deg)`;
   place(right,SW-x,x,x,W);    right.style.transform=`rotateY(${-th}deg)`;
+
+  /* soft ground shadow under the base */
+  const m=1.7;
+  place(shadow,x-m,x-m,L+2*m,W+2*m);
+  shadow.style.transform=`translate(6px,8px) translateZ(-2px)`;
+  shadow.style.opacity=Math.min(1,st.fold*1.4)*0.85;
+
+  /* marking outline */
+  place(markOutline,x,x,L,W);
+
+  /* corner squares: pop up, tumble away and fade */
   const pos=[[0,0,-1,-1],[SW-x,0,1,-1],[0,SH-x,-1,1],[SW-x,SH-x,1,1]];
+  const u=st.cut;
+  const fly=u*u;
+  const lift=Math.sin(Math.min(1,u*1.25)*Math.PI)*44;
+  const fade=1-Math.pow(u,2);
   corn.forEach((c,i)=>{
     const p=pos[i]; place(c,p[0],p[1],x,x);
-    c.style.transform=`translate(${p[2]*st.cut*90}px,${p[3]*st.cut*90}px) translateZ(${st.cut*40}px) rotateZ(${p[2]*p[3]*st.cut*40}deg)`;
-    c.style.opacity=1-Math.pow(st.cut,1.5);
-    c.style.display=st.cut>=0.999?"none":"block";
+    c.style.transform=
+      `translate(${p[2]*fly*150}px,${p[3]*fly*150}px) `+
+      `translateZ(${lift}px) `+
+      `rotateZ(${p[2]*p[3]*u*220}deg) `+
+      `scale(${1-0.35*u})`;
+    c.style.opacity=u>=1?0:fade;
+    c.style.display=u>=0.999?"none":"block";
   });
+
   sheet.classList.toggle("marked",st.marks);
+
   /* water */
   const wh=st.fill*x*S, show=st.fill>0.001&&st.fold>=0.999;
   sheet.classList.toggle("filling",show);
@@ -385,6 +468,7 @@ function render(){
     Object.assign(wL.style,{left:bx+e-wh+"px",top:by+e+"px",width:wh+"px",height:bh-2*e+"px",transformOrigin:"100% 50%",transform:"rotateY(90deg)"});
     Object.assign(wR.style,{left:bx+bw-e+"px",top:by+e+"px",width:wh+"px",height:bh-2*e+"px",transformOrigin:"0 50%",transform:"rotateY(-90deg)"});
   }
+
   /* readouts */
   const v=V(x);
   $("xval").textContent=f(x)+" cm";
@@ -397,6 +481,7 @@ function render(){
   $("wV").textContent=f(wv,1)+" cm³";
   $("wL").textContent=f(wv,0)+" mL"+(wv>=1000?"  ("+f(wv/1000,2)+" L)":"");
   $("wB").style.width=st.fill*100+"%";
+
   drawGraph();
 }
 
@@ -409,30 +494,39 @@ window.addEventListener("resize",()=>{fit();drawGraph();});
 
 /* ---------- animation ---------- */
 let token=0;
-const say=t=>$("say").textContent=t;
+const sayEl=$("say");
+function say(t){
+  sayEl.textContent=t;
+  sayEl.classList.remove("pop"); void sayEl.offsetWidth; sayEl.classList.add("pop");
+}
+const PROG={0:0,1:25,2:50,3:75,4:75,5:100};
 function setStep(n){
   st.step=n;
   document.querySelectorAll("#pills .pill").forEach(p=>{
     const s=+p.dataset.s; p.classList.toggle("on",s===n); p.classList.toggle("done",s<n);
   });
+  if(PROG[n]!==undefined) $("prog").style.width=PROG[n]+"%";
 }
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-function tween(ms,fn,my){
+function tween(ms,fn,my,easing){
   return new Promise(res=>{
+    const ez=easing||ease;
     const t0=performance.now();
     (function fr(t){
       if(my!==token){res(false);return;}
-      const p=Math.min(1,(t-t0)/ms); fn(ease(p)); render();
+      const p=Math.min(1,(t-t0)/ms); fn(ez(p)); render();
       if(p<1) requestAnimationFrame(fr); else res(true);
     })(t0);
   });
 }
 function resetState(){
   token++; st.cut=0;st.fold=0;st.fill=0;st.marks=false;setStep(0);
+  $("stage").classList.remove("done");
   say("Press ▶ Play to start the animation."); render();
 }
 async function play(){
   const my=++token; st.cut=0;st.fold=0;st.fill=0;st.marks=false;setStep(0);
+  $("stage").classList.remove("done");
   say("We start with one flat A4 sheet: 29.7 cm × 21 cm."); render();
   await sleep(1300); if(my!==token)return;
   setStep(1); st.marks=true; render();
@@ -442,15 +536,18 @@ async function play(){
   if(!await tween(1500,p=>st.cut=p,my))return;
   await sleep(500); if(my!==token)return;
   setStep(3); say("Fold the four sides up along the dashed lines and tape the corners.");
-  if(!await tween(2600,p=>st.fold=p,my))return;
+  if(!await tween(2600,p=>st.fold=Math.min(1.06,p),my,easeOutBack))return;
+  st.fold=1; render();
   await sleep(600); if(my!==token)return;
   setStep(4); say("Now fill it with water to test the volume…");
-  if(!await tween(5200,p=>st.fill=p,my))return;
+  if(!await tween(5200,p=>{st.fill=p; $("prog").style.width=(75+25*p)+"%";},my))return;
   setStep(5);
+  $("stage").classList.add("done");
   say(`Full! Volume = ${f(st.x)} × ${f(SW-2*st.x)} × ${f(SH-2*st.x)} = ${f(V(st.x),1)} cm³ (≈ ${f(V(st.x)/1000,2)} litres).`);
 }
 function finish(){
   token++; st.cut=1;st.fold=1;st.fill=1;st.marks=false;setStep(5);
+  $("stage").classList.add("done");
   say(`Finished box: ${f(V(st.x),1)} cm³ (≈ ${f(V(st.x)/1000,2)} litres).`); render();
 }
 $("play").onclick=play; $("reset").onclick=resetState; $("done").onclick=finish;
