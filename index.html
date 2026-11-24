@@ -4,156 +4,79 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BoxWise Packaging Co. | The Box Optimization Project</title>
-<meta name="description" content="How a cubic polynomial finds the largest open-top box that can be made from one A4 sheet.">
+<meta name="description" content="How a cubic polynomial finds the largest open-top box (and a matching lid) from one A4 sheet.">
 <style>
-:root{
-  --bg:#faf6ef; --card:#ffffff; --ink:#1f2937; --muted:#5b6472; --line:#e6dccb;
-  --brown:#b98a54; --brown-d:#8a6232; --blue:#1f5fa8; --red:#d03a2f; --green:#2b8a3e;
-  --water:rgba(40,140,230,.55);
-}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
+:root{--bg:#faf6ef;--card:#fff;--ink:#1f2937;--muted:#5b6472;--line:#e6dccb;--brown:#b98a54;--brown-d:#8a6232;--blue:#1f5fa8;--red:#d03a2f;--green:#2b8a3e}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
-a{color:var(--blue)}
-.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+a{color:var(--blue)}.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
 nav{position:sticky;top:0;z-index:50;background:rgba(250,246,239,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
 nav .wrap{display:flex;align-items:center;gap:18px;height:56px;overflow-x:auto;white-space:nowrap}
-nav b{font-size:17px;margin-right:auto}
-nav a{text-decoration:none;color:var(--muted);font-size:14px}
-nav a:hover{color:var(--ink)}
+nav b{font-size:17px;margin-right:auto}nav a{text-decoration:none;color:var(--muted);font-size:14px}nav a:hover{color:var(--ink)}
 header.hero{padding:64px 0 36px;text-align:center}
 .badge{display:inline-block;background:#f1e3cc;color:var(--brown-d);padding:4px 12px;border-radius:99px;font-size:13px;font-weight:600;letter-spacing:.04em}
-h1{font-size:clamp(34px,6vw,60px);line-height:1.08;margin:14px 0 10px;letter-spacing:-.02em}
-h1 span{color:var(--brown-d)}
+h1{font-size:clamp(34px,6vw,60px);line-height:1.08;margin:14px 0 10px;letter-spacing:-.02em}h1 span{color:var(--brown-d)}
 .lead{font-size:19px;color:var(--muted);max-width:720px;margin:0 auto}
-section{padding:44px 0}
-h2{font-size:30px;margin:0 0 6px;letter-spacing:-.01em}
-h2 + p.sub{color:var(--muted);margin:0 0 22px}
-h3{margin:22px 0 6px;font-size:18px}
-.grid{display:grid;gap:18px}
-.g2{grid-template-columns:repeat(2,1fr)}
-.g3{grid-template-columns:repeat(3,1fr)}
+section{padding:44px 0}h2{font-size:30px;margin:0 0 6px}h2+p.sub{color:var(--muted);margin:0 0 22px}h3{margin:22px 0 6px;font-size:18px}
+.grid{display:grid;gap:18px}.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}
 @media(max-width:820px){.g2,.g3{grid-template-columns:1fr}}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 1px 0 rgba(0,0,0,.02)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}
 .quote{border-left:4px solid var(--brown);background:#fff;padding:14px 18px;border-radius:0 12px 12px 0;color:#3b4350;font-style:italic}
 .math{font-family:"Cambria Math",Cambria,"Times New Roman",serif;font-size:18px;background:#f6f1e7;border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:8px 0;overflow-x:auto}
 .math.big{font-size:21px;text-align:center}
-.tag{display:inline-block;font-size:12px;font-weight:700;color:#fff;background:var(--blue);border-radius:6px;padding:2px 8px;margin-right:6px}
 table{border-collapse:collapse;width:100%;font-size:15px}
-th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right}
-th:first-child,td:first-child{text-align:left}
-th{background:#f6f1e7;font-weight:600}
-tr.best td{background:#e8f4ea;font-weight:700}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right}th:first-child,td:first-child{text-align:left}
+th{background:#f6f1e7;font-weight:600}tr.best td{background:#e8f4ea;font-weight:700}
 .note{font-size:14px;color:var(--muted)}
 .btn{appearance:none;border:0;border-radius:10px;padding:10px 16px;font:inherit;font-weight:600;cursor:pointer;background:var(--ink);color:#fff}
-.btn.alt{background:#fff;color:var(--ink);border:1px solid var(--line)}
-.btn.blue{background:var(--blue)}
-.btn:hover{filter:brightness(1.08)}
+.btn.alt{background:#fff;color:var(--ink);border:1px solid var(--line)}.btn.blue{background:var(--blue)}.btn:hover{filter:brightness(1.08)}
 .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 
-/* ---------- 3D stage ---------- */
-.lab{display:grid;grid-template-columns:1.5fr 1fr;gap:18px}
-@media(max-width:900px){.lab{grid-template-columns:1fr}}
-.stage{perspective:1500px;height:440px;border-radius:16px;border:1px solid var(--line);
-  background:radial-gradient(ellipse at 50% 88%,#ffffff 0%,#f4ecdc 52%,#e7d9be 100%);
-  display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+/* 3D stage */
+.lab{display:grid;grid-template-columns:1.5fr 1fr;gap:18px}@media(max-width:900px){.lab{grid-template-columns:1fr}}
+.stage{perspective:1500px;height:440px;border-radius:16px;border:1px solid var(--line);background:radial-gradient(ellipse at 50% 88%,#fff 0%,#f4ecdc 52%,#e7d9be 100%);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
 .fit{transform-style:preserve-3d;transform:scale(var(--k,1))}
 .tilt{position:relative;transform-style:preserve-3d;transform:rotateX(58deg) rotateZ(-35deg)}
 .sheet{position:relative;transform-style:preserve-3d}
 .part{position:absolute;transform-style:preserve-3d;backface-visibility:visible;
-  background:
-    repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 3px,rgba(0,0,0,.03) 3px 6px),
-    repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0 2px,rgba(0,0,0,.02) 2px 4px),
-    linear-gradient(135deg,#dcb783,#c59c63);
-  border:2px solid rgba(100,66,28,.28);
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.22), inset 0 -8px 14px rgba(90,58,20,.07);
-  transition:border-color .5s,opacity .3s}
-.back{transform-origin:50% 100%}.front{transform-origin:50% 0}
-.left{transform-origin:100% 50%}.right{transform-origin:0 50%}
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 3px,rgba(0,0,0,.03) 3px 6px),repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0 2px,rgba(0,0,0,.02) 2px 4px),linear-gradient(135deg,#dcb783,#c59c63);
+  border:2px solid rgba(100,66,28,.28);box-shadow:inset 0 0 0 1px rgba(255,255,255,.22),inset 0 -8px 14px rgba(90,58,20,.07)}
+.back{transform-origin:50% 100%}.front{transform-origin:50% 0}.left{transform-origin:100% 50%}.right{transform-origin:0 50%}
 .corn{background:linear-gradient(135deg,#ecd9ba,#e0c799)}
+/* lid: slightly lighter, tinted so it reads as a separate piece */
+.part.lidp{background:repeating-linear-gradient(90deg,rgba(255,255,255,.1) 0 3px,rgba(0,0,0,.03) 3px 6px),linear-gradient(135deg,#efd3a2,#d9b47a);border:2px solid rgba(100,66,28,.45);opacity:.94}
+.lidg{position:absolute;left:0;top:0;width:0;height:0;transform-style:preserve-3d;display:none}
 .sheet.marked .base,.sheet.marked .back,.sheet.marked .front,.sheet.marked .left,.sheet.marked .right{border:2px dashed var(--blue)}
-.sheet.marked .corn{border:2px solid var(--red);animation:cornPulse 1.3s ease-in-out infinite}
-@keyframes cornPulse{
-  0%,100%{box-shadow:0 0 0 rgba(208,58,47,0)}
-  50%{box-shadow:0 0 16px rgba(208,58,47,.8)}
-}
+.sheet.marked .corn{border:2px solid var(--red);animation:cp 1.3s ease-in-out infinite}
+@keyframes cp{0%,100%{box-shadow:0 0 0 rgba(208,58,47,0)}50%{box-shadow:0 0 16px rgba(208,58,47,.8)}}
 .sheet.filling .back,.sheet.filling .front,.sheet.filling .left,.sheet.filling .right{opacity:.72}
+.shadow{position:absolute;border-radius:50%;pointer-events:none;opacity:0;background:radial-gradient(closest-side,rgba(80,52,18,.34),rgba(80,52,18,.1) 55%,rgba(80,52,18,0) 78%)}
+.markoutline{position:absolute;border:2px dashed var(--blue);border-radius:3px;pointer-events:none;opacity:0;transform:translateZ(.6px)}
+.sheet.marked .markoutline{animation:dr .9s ease forwards}
+@keyframes dr{from{opacity:0;transform:translateZ(.6px) scale(.9)}to{opacity:1;transform:translateZ(.6px) scale(1)}}
 
-/* soft ground shadow */
-.shadow{position:absolute;border-radius:50%;pointer-events:none;opacity:0;
-  background:radial-gradient(closest-side,rgba(80,52,18,.34),rgba(80,52,18,.10) 55%,rgba(80,52,18,0) 78%);
-  transform:translateZ(-2px)}
-
-/* marking outline */
-.markoutline{position:absolute;border:2px dashed #1f5fa8;border-radius:3px;pointer-events:none;opacity:0;
-  transform:translateZ(.6px)}
-.sheet.marked .markoutline{animation:drawOutline .9s ease forwards}
-@keyframes drawOutline{
-  from{opacity:0;transform:translateZ(.6px) scale(.9)}
-  to{opacity:1;transform:translateZ(.6px) scale(1)}
-}
-
-/* ---------- water ---------- */
-.w{
-  position:absolute;display:none;backface-visibility:visible;
-  background:linear-gradient(180deg,rgba(126,198,248,.55) 0%,rgba(38,118,202,.72) 55%,rgba(26,94,174,.78) 100%);
-  border:1px solid rgba(255,255,255,.42);
-  box-shadow:inset 0 0 10px rgba(255,255,255,.2);
-}
-.wtop{
-  background:
-    radial-gradient(70% 60% at 28% 24%, rgba(255,255,255,.6) 0%, rgba(255,255,255,.16) 32%, rgba(255,255,255,0) 66%),
-    linear-gradient(160deg, rgba(132,204,250,.78) 0%, rgba(52,136,214,.72) 50%, rgba(30,100,180,.74) 100%);
-  box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,.45),
-    inset 0 0 22px rgba(255,255,255,.2);
-  overflow:hidden;
-}
-.wtop::before,.wtop::after{
-  content:"";position:absolute;border-radius:50%;pointer-events:none;filter:blur(1.5px);
-}
-.wtop::before{
-  width:60%;height:46%;left:0;top:2%;
-  background:radial-gradient(closest-side, rgba(255,255,255,.55), rgba(255,255,255,0) 72%);
-  animation:causticA 11s ease-in-out infinite alternate;
-}
-.wtop::after{
-  width:48%;height:40%;right:-2%;bottom:0;
-  background:radial-gradient(closest-side, rgba(186,230,255,.55), rgba(186,230,255,0) 76%);
-  animation:causticB 13s ease-in-out infinite alternate;
-}
-@keyframes causticA{
-  0%{transform:translate(0,0) scale(1);opacity:.5}
-  100%{transform:translate(26%,8%) scale(1.14);opacity:.85}
-}
-@keyframes causticB{
-  0%{transform:translate(0,0) scale(1.1);opacity:.55}
-  100%{transform:translate(-28%,-10%) scale(1);opacity:.8}
-}
+/* water */
+.w{position:absolute;display:none;backface-visibility:visible;background:linear-gradient(180deg,rgba(126,198,248,.55),rgba(38,118,202,.72) 55%,rgba(26,94,174,.78));border:1px solid rgba(255,255,255,.42);box-shadow:inset 0 0 10px rgba(255,255,255,.2)}
+.wtop{background:radial-gradient(70% 60% at 28% 24%,rgba(255,255,255,.6),rgba(255,255,255,.16) 32%,rgba(255,255,255,0) 66%),linear-gradient(160deg,rgba(132,204,250,.78),rgba(52,136,214,.72) 50%,rgba(30,100,180,.74));overflow:hidden}
+.wtop::before,.wtop::after{content:"";position:absolute;border-radius:50%;pointer-events:none;filter:blur(1.5px)}
+.wtop::before{width:60%;height:46%;left:0;top:2%;background:radial-gradient(closest-side,rgba(255,255,255,.55),rgba(255,255,255,0) 72%);animation:cA 11s ease-in-out infinite alternate}
+.wtop::after{width:48%;height:40%;right:-2%;bottom:0;background:radial-gradient(closest-side,rgba(186,230,255,.55),rgba(186,230,255,0) 76%);animation:cB 13s ease-in-out infinite alternate}
+@keyframes cA{0%{transform:translate(0,0) scale(1);opacity:.5}100%{transform:translate(26%,8%) scale(1.14);opacity:.85}}
+@keyframes cB{0%{transform:translate(0,0) scale(1.1);opacity:.55}100%{transform:translate(-28%,-10%) scale(1);opacity:.8}}
 
 .caption{position:absolute;left:14px;right:14px;top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;z-index:5}
 .pill{font-size:12px;font-weight:700;padding:4px 10px;border-radius:99px;background:#fff;border:1px solid var(--line);color:var(--muted);transition:.3s}
 .pill.on{background:var(--ink);color:#fff;border-color:var(--ink);animation:pop .35s ease}
-.pill.done{background:#e8f4ea;color:var(--green);border-color:#bfe0c6}
-.pill.done::after{content:" ✓"}
+.pill.done{background:#e8f4ea;color:var(--green);border-color:#bfe0c6}.pill.done::after{content:" ✓"}
 @keyframes pop{0%{transform:scale(.88)}60%{transform:scale(1.1)}100%{transform:scale(1)}}
-
 .progress{position:absolute;left:0;right:0;top:0;height:3px;z-index:6;background:rgba(0,0,0,.05)}
 .progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,#b98a54,#1f5fa8);transition:width .45s ease}
-
 .say{position:absolute;left:14px;right:14px;bottom:12px;background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-weight:600;z-index:5;min-height:46px}
-.say.pop{animation:sayIn .45s ease}
-@keyframes sayIn{from{opacity:.15;transform:translateY(7px)}to{opacity:1;transform:none}}
+.say.pop{animation:si .45s ease}@keyframes si{from{opacity:.15;transform:translateY(7px)}to{opacity:1;transform:none}}
+.stage.done .tilt{animation:dft 8s ease-in-out infinite}
+@keyframes dft{0%,100%{transform:rotateX(58deg) rotateZ(-35deg)}50%{transform:rotateX(56deg) rotateZ(-33.4deg)}}
 
-/* gentle camera drift when the box is finished */
-.stage.done .tilt{animation:drift 8s ease-in-out infinite}
-@keyframes drift{
-  0%,100%{transform:rotateX(58deg) rotateZ(-35deg)}
-  50%{transform:rotateX(56deg) rotateZ(-33.4deg)}
-}
-
-.panel .stat{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--line)}
-.panel .stat:last-child{border:0}
+.panel .stat{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--line)}.panel .stat:last-child{border:0}
 .panel .stat b{font-variant-numeric:tabular-nums}
 .big{font-size:34px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .bar{height:14px;background:#e9eef5;border-radius:99px;overflow:hidden;margin-top:6px}
@@ -161,43 +84,35 @@ tr.best td{background:#e8f4ea;font-weight:700}
 input[type=range]{width:100%;accent-color:var(--blue)}
 input[type=number]{width:110px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font:inherit}
 canvas{width:100%;display:block;background:#fff;border:1px solid var(--line);border-radius:14px;touch-action:none;cursor:crosshair}
-details{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:10px 0}
-summary{cursor:pointer;font-weight:700}
+details{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:10px 0}summary{cursor:pointer;font-weight:700}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
-.chip{border:1px solid var(--line);background:#fff;border-radius:99px;padding:5px 12px;cursor:pointer;font:inherit;font-size:14px}
-.chip:hover{border-color:var(--blue)}
+.chip{border:1px solid var(--line);background:#fff;border-radius:99px;padding:5px 12px;cursor:pointer;font:inherit;font-size:14px}.chip:hover{border-color:var(--blue)}
 footer{padding:36px 0 60px;color:var(--muted);text-align:center;font-size:14px;border-top:1px solid var(--line)}
-.ok{color:var(--green);font-weight:700}
-
-@media (prefers-reduced-motion: reduce){
-  .stage.done .tilt,.wtop::before,.wtop::after,.sheet.marked .corn{animation:none!important}
-}
+@media (prefers-reduced-motion:reduce){.stage.done .tilt,.wtop::before,.wtop::after,.sheet.marked .corn{animation:none!important}}
 </style>
 </head>
 <body>
 
 <nav><div class="wrap">
   <b>📦 BoxWise Packaging Co.</b>
-  <a href="#why">Why</a><a href="#lab">Box lab</a><a href="#model">The model</a>
-  <a href="#graph">Graph</a><a href="#data">Data</a><a href="#build">Prototype</a><a href="#challenge">Challenges</a><a href="#pitch">Pitch</a>
+  <a href="#why">Why</a><a href="#lab">Box lab</a><a href="#model">The model</a><a href="#graph">Graph</a><a href="#data">Data</a><a href="#build">Prototype</a><a href="#challenge">Challenges</a><a href="#pitch">Pitch</a>
 </div></nav>
 
 <header class="hero"><div class="wrap">
   <span class="badge">ALGEBRA 2 · POLYNOMIAL FUNCTIONS PROJECT</span>
   <h1>Which square should we cut to build the <span>biggest box?</span></h1>
-  <p class="lead">One A4 sheet. Four equal corner squares. One cubic polynomial that tells us exactly how big to cut. This site walks through the whole design, from the client brief to the final prototype.</p>
+  <p class="lead">One A4 sheet. Four equal corner squares. One cubic polynomial that tells us exactly how big to cut, plus a lid that fits. This site walks through the whole design, from the client brief to the final prototype.</p>
   <p class="note">Presented by <b>BoxWise Packaging Co.</b> &nbsp;·&nbsp; Team: <i>Chaitanya, Elias, Zaid, Jan, Jad</i></p>
 </div></header>
 
-<!-- WHY -->
 <section id="why"><div class="wrap">
   <h2>Why are we doing this?</h2>
   <p class="sub">The client brief, the question and what we need to prove.</p>
   <div class="grid g2">
     <div>
-      <div class="quote">“We ship our product in open-top trays made by cutting equal squares from each corner of an A4 sheet and folding up the sides. We want the tray with the largest possible volume. Tell us exactly what size squares to cut, prove it is the best choice, and send us a working prototype.”</div>
+      <div class="quote">“We ship our product in open-top trays made by cutting equal squares from each corner of an A4 sheet and folding up the sides. We want the tray with the largest possible volume, and a lid to go with it. Tell us exactly what size squares to cut, prove it is the best choice, and send us a working prototype.”</div>
       <h3>The real-world problem</h3>
-      <p>Companies pay for material, shipping space and storage. A tray that holds more product from the same sheet of cardboard saves money on every single shipment. But cutting a bigger square makes the walls taller <i>and</i> the base smaller, so it is not obvious where the best answer is.</p>
+      <p>Companies pay for material, shipping space and storage. A tray that holds more product from the same sheet of cardboard saves money on every shipment. But cutting a bigger square makes the walls taller <i>and</i> the base smaller, so it is not obvious where the best answer is.</p>
     </div>
     <div class="card">
       <h3 style="margin-top:0">What we need to do</h3>
@@ -206,25 +121,23 @@ footer{padding:36px 0 60px;color:var(--muted);text-align:center;font-size:14px;b
         <li>Turn the pattern into a polynomial function <b>V(x)</b>.</li>
         <li>Find a sensible domain, and describe degree, end behavior and zeros.</li>
         <li>Use a graph to find the <b>maximum</b> volume.</li>
+        <li>Design a lid that fits the best box.</li>
         <li>Build the best box and compare it to the model (percent error).</li>
-        <li>Explain why the math answer may need adjusting in the real world.</li>
       </ul>
       <p class="note" style="margin-bottom:0"><b>Driving question:</b> how can a polynomial model help a company make the best design decision?</p>
     </div>
   </div>
 </div></section>
 
-<!-- LAB -->
 <section id="lab"><div class="wrap">
   <h2>The box lab</h2>
-  <p class="sub">Press play to watch the sheet get marked, cut, folded and filled with water to test its volume. Then drag the slider to try a different cut size.</p>
+  <p class="sub">Press play to watch the sheet get marked, cut, folded, filled with water and finally covered with its lid. Then drag the slider to try a different cut size.</p>
   <div class="lab">
     <div>
       <div class="stage" id="stage">
         <div class="progress"><i id="prog"></i></div>
         <div class="caption" id="pills">
-          <span class="pill" data-s="1">1 Mark</span><span class="pill" data-s="2">2 Cut</span>
-          <span class="pill" data-s="3">3 Fold</span><span class="pill" data-s="4">4 Fill with water</span>
+          <span class="pill" data-s="1">1 Mark</span><span class="pill" data-s="2">2 Cut</span><span class="pill" data-s="3">3 Fold</span><span class="pill" data-s="4">4 Fill with water</span><span class="pill" data-s="5">5 Add lid</span>
         </div>
         <div class="fit" id="fit"><div class="tilt" id="tilt"><div class="sheet" id="sheet"></div></div></div>
         <div class="say" id="say">Press ▶ Play to start the animation.</div>
@@ -240,8 +153,7 @@ footer{padding:36px 0 60px;color:var(--muted);text-align:center;font-size:14px;b
       <div class="row" style="justify-content:space-between"><span class="big" id="xval">4.04 cm</span><button class="chip" id="best">★ best cut</button></div>
       <input type="range" id="xs" min="0.5" max="10.4" step="0.01" value="4.04" aria-label="Cut size x in centimetres">
       <div class="chips" style="margin:8px 0 12px">
-        <button class="chip" data-x="1">1</button><button class="chip" data-x="2">2</button><button class="chip" data-x="3">3</button>
-        <button class="chip" data-x="5">5</button><button class="chip" data-x="7">7</button><button class="chip" data-x="9">9</button>
+        <button class="chip" data-x="1">1</button><button class="chip" data-x="2">2</button><button class="chip" data-x="3">3</button><button class="chip" data-x="5">5</button><button class="chip" data-x="7">7</button><button class="chip" data-x="9">9</button>
       </div>
       <div class="stat"><span>Length 29.7 − 2x</span><b id="dL">–</b></div>
       <div class="stat"><span>Width 21 − 2x</span><b id="dW">–</b></div>
@@ -249,6 +161,11 @@ footer{padding:36px 0 60px;color:var(--muted);text-align:center;font-size:14px;b
       <div class="stat"><span>Volume V(x)</span><b id="dV">–</b></div>
       <div class="stat"><span>Compared with the best box</span><b id="dP">–</b></div>
       <div class="math" id="calc" style="font-size:15px;margin-top:12px">–</div>
+      <h3>Lid (+0.5 cm clearance, height x/5)</h3>
+      <div class="stat"><span>Lid length 30.2 − 2x</span><b id="lL">–</b></div>
+      <div class="stat"><span>Lid width 21.5 − 2x</span><b id="lW">–</b></div>
+      <div class="stat"><span>Lid height x/5</span><b id="lH">–</b></div>
+      <div class="stat"><span>Lid volume</span><b id="lV">–</b></div>
       <h3>Water test</h3>
       <div class="stat"><span>Water height</span><b id="wH">0.00 cm</b></div>
       <div class="stat"><span>Volume of water</span><b id="wV">0.0 cm³</b></div>
@@ -259,7 +176,6 @@ footer{padding:36px 0 60px;color:var(--muted);text-align:center;font-size:14px;b
   </div>
 </div></section>
 
-<!-- MODEL -->
 <section id="model"><div class="wrap">
   <h2>Part 2: building the model</h2>
   <p class="sub">From the flat sheet to a polynomial.</p>
@@ -302,7 +218,6 @@ footer{padding:36px 0 60px;color:var(--muted);text-align:center;font-size:14px;b
   </div>
 </div></section>
 
-<!-- GRAPH -->
 <section id="graph"><div class="wrap">
   <h2>Part 3: finding the best box</h2>
   <p class="sub">Click or drag on the graph to move the cut size. The box in the lab above updates too.</p>
@@ -310,18 +225,17 @@ footer{padding:36px 0 60px;color:var(--muted);text-align:center;font-size:14px;b
   <div class="row note" style="margin-top:8px"><span><b style="color:#1f5fa8">━</b> real boxes (domain)</span><span><b style="color:#999">┅</b> outside the domain</span><span><b style="color:#d9480f">●</b> measured test boxes</span><span><b style="color:#2b8a3e">●</b> V = 1000</span></div>
   <div class="grid g3" style="margin-top:18px">
     <div class="card"><h3 style="margin-top:0">Maximum</h3>
-      <p>Setting the slope to zero: V′(x) = 12x² − 202.8x + 623.7 = 0 gives x ≈ 4.0423.</p>
+      <p>Using the graph’s maximum point (or testing values near the peak, as in Challenge 1) gives x ≈ 4.04.</p>
       <div class="math">The best cut size is <b>4.04 cm</b>, giving a volume of <b>1128.50 cm³</b>.</div></div>
     <div class="card"><h3 style="margin-top:0">Two boxes with 1000 cm³</h3>
-      <p>Solving x(29.7 − 2x)(21 − 2x) = 1000 gives <b>x ≈ 2.56 cm</b> and <b>x ≈ 5.71 cm</b>.</p>
-      <p class="note" style="margin-bottom:0">There are two answers because the volume rises to the peak and then falls, so the line V = 1000 crosses the curve once on each side. (The third root, 17.08, is outside the domain.)</p></div>
+      <p>Graphing y = 1000 with V(x) shows crossings at <b>x ≈ 2.56 cm</b> and <b>x ≈ 5.71 cm</b>.</p>
+      <p class="note" style="margin-bottom:0">There are two answers because the volume rises to the peak and then falls, so the line V = 1000 crosses the curve once on each side. (A third crossing, 17.08, is outside the domain.)</p></div>
     <div class="card"><h3 style="margin-top:0">Model vs real boxes</h3>
       <p>The orange test-box points lie on the curve. The model fits real boxes closely, so we can trust it to choose the design.</p>
       <p class="note" style="margin-bottom:0">Real boxes differ a little because of measuring error, folds and tape.</p></div>
   </div>
 </div></section>
 
-<!-- DATA -->
 <section id="data"><div class="wrap">
   <h2>Part 1: test box data</h2>
   <p class="sub">Each test box was built from A4 paper. The table is calculated from the dimensions.</p>
@@ -339,22 +253,13 @@ footer{padding:36px 0 60px;color:var(--muted);text-align:center;font-size:14px;b
   </div>
 </div></section>
 
-<!-- BUILD -->
 <section id="build"><div class="wrap">
   <h2>Part 4: prototype and volume test</h2>
-  <p class="sub">The prototype is built to the optimal cut. Here is the design spec and how five real test trays measured up against the model.</p>
+  <p class="sub">The prototype is built to the optimal cut, with a matching lid. Here is the design spec and how five real test trays measured up against the model.</p>
   <div class="grid g2">
     <div class="card">
       <h3 style="margin-top:0">Design specification</h3>
-      <table>
-        <tr><th>Item</th><th>Value</th></tr>
-        <tr><td>Sheet</td><td>29.7 × 21 cm</td></tr>
-        <tr><td>Cut squares</td><td>4.04 × 4.04 cm</td></tr>
-        <tr><td>Length</td><td>21.62 cm</td></tr>
-        <tr><td>Width</td><td>12.92 cm</td></tr>
-        <tr><td>Height</td><td>4.04 cm</td></tr>
-        <tr><td>Predicted volume</td><td>1128.50 cm³</td></tr>
-      </table>
+      <table id="spec"></table>
       <p class="note">Tip for building: a ruler can measure 40.4 mm. Check that the fold line is the same distance from all four edges before you cut, or the walls will come out uneven.</p>
     </div>
     <div class="card">
@@ -367,7 +272,6 @@ footer{padding:36px 0 60px;color:var(--muted);text-align:center;font-size:14px;b
   </div>
 </div></section>
 
-<!-- CHALLENGE -->
 <section id="challenge"><div class="wrap">
   <h2>Challenge questions</h2>
   <p class="sub">Tap each one to see the working.</p>
@@ -376,21 +280,19 @@ footer{padding:36px 0 60px;color:var(--muted);text-align:center;font-size:14px;b
     <p>The volume increases up to 4.04 and decreases at 4.05, so the maximum to two decimal places is <b>x = 4.04 cm</b>, V ≈ 1128.50 cm³.</p>
   </details>
   <details><summary>2 · Best cut for a square sheet of side s</summary>
-    <p>For a square sheet, V(x) = x(s − 2x)². Write V = ¼ · (4x)(s − 2x)(s − 2x). The three factors add up to 4x + (s − 2x) + (s − 2x) = s, a constant. A product with a fixed sum is largest when the factors are equal (AM–GM), so 4x = s − 2x, which gives 6x = s:</p>
-    <div class="math big">x = s / 6</div>
-    <p>Check with calculus: V′ = (s − 2x)(s − 6x) = 0, so x = s/6 (x = s/2 gives zero volume), and V″ &lt; 0 there, so it is a maximum. The maximum volume is 2s³/27.</p>
+    <p>For a square sheet, V(x) = x(s − 2x)². Test some cuts for s = 21 cm:</p>
+    <div style="overflow-x:auto"><table id="t2"></table></div>
+    <p>The best cut is x = 3.5 cm, which is 21 ÷ 6. Try another sheet, s = 12: x = 1.5 gives 121.5, x = 2 gives 128 and x = 2.5 gives 122.5, so the best is again 12 ÷ 6 = 2.</p>
+    <div class="math big">x = s / 6, &nbsp; maximum volume = 2s³ / 27</div>
     <div class="row">Try it: sheet side s = <input type="number" id="sS" value="21" min="1" step="1"> cm
     <span class="math" id="sOut" style="margin:0">–</span></div>
   </details>
   <details><summary>3 · Designing the lid</summary>
-    <p>To make a lid that fits over the box, we add 0.5 cm of clearance to the base's length and width. The height of the lid must be 1/5th of the cut size (x/5).</p>
-    <p>Base dimensions: L = 29.7 − 2x, W = 21 − 2x.<br>
-    Lid dimensions: L = 30.2 − 2x, W = 21.5 − 2x, H = x/5.</p>
-    <div class="math big">V(x) = (x/5)(30.2 − 2x)(21.5 − 2x)</div>
-    <p>Expanding: V(x) = 0.2x(4x² − 103.4x + 649.3) = <b>0.8x³ − 20.68x² + 129.86x</b>.</p>
-    <p>Taking the derivative and setting it to zero: V′(x) = 2.4x² − 41.36x + 129.86 = 0.</p>
-    <p>Using the quadratic formula, the valid root is <b>x ≈ 4.13 cm</b> (the other root, 13.1, is outside the domain).</p>
-    <p>So the optimal lid height is 4.13/5 ≈ <b>0.83 cm</b>, and the lid volume is about <b>240 cm³</b>.</p>
+    <p>The lid is a second, shallow box that fits over the first one. Add 2(0.25) = 0.5 cm to the base’s length and width so it slides on, and make the lid height 1/5 of x.</p>
+    <div class="math">Lid length = 30.2 − 2x<br>Lid width = 21.5 − 2x<br>Lid height = x/5</div>
+    <div class="math big">V<sub>lid</sub>(x) = (x/5)(30.2 − 2x)(21.5 − 2x) = 0.8x³ − 20.68x² + 129.86x</div>
+    <p id="lidWork">–</p>
+    <p class="note">Because the lid depends on the base’s x, we use the best base cut x = 4.04 cm. Toggle the slider in the lab to see how the lid changes with x.</p>
   </details>
   <details><summary>4 · Lowest cost per cm³</summary>
     <p>Cost per tray = 0.5 AED (sheet) + 4 × 0.1 AED (tape) = <b>0.90 AED</b>, whatever the cut size. So the cost per cm³ is 0.9 / V(x), which is lowest when V(x) is largest:</p>
@@ -398,11 +300,10 @@ footer{padding:36px 0 60px;color:var(--muted);text-align:center;font-size:14px;b
   </details>
   <details><summary>5 · Average rate of change (why the maximum is between 3 and 5)</summary>
     <div class="math">On [3, 4]: (1128.4 − 1066.5) / 1 = <b>+61.9</b> cm³ per cm<br>On [4, 5]: (1083.5 − 1128.4) / 1 = <b>−44.9</b> cm³ per cm</div>
-    <p>The volume was increasing on [3, 4] and decreasing on [4, 5]. The rate of change switches from positive to negative, so the peak lies between these two intervals, close to x = 4. A straight-line estimate of where the slope crosses zero gives x ≈ 4.08, close to the true 4.04.</p>
+    <p>The volume was increasing on [3, 4] and decreasing on [4, 5]. The rate of change switches from positive to negative, so the peak lies between these two intervals, close to x = 4. A straight-line estimate of where the rate crosses zero gives x ≈ 4.08, close to the true 4.04.</p>
   </details>
 </div></section>
 
-<!-- PITCH -->
 <section id="pitch"><div class="wrap">
   <h2>Recommendation to the client</h2>
   <p class="sub">What BoxWise Packaging Co. advises.</p>
@@ -411,10 +312,10 @@ footer{padding:36px 0 60px;color:var(--muted);text-align:center;font-size:14px;b
     <ul>
       <li><b>Function:</b> V(x) = x(29.7 − 2x)(21 − 2x) = 4x³ − 101.4x² + 623.7x, domain 0 &lt; x &lt; 10.5.</li>
       <li><b>Practical option:</b> a 4 cm cut gives 1128.4 cm³, a difference of less than 0.01%, and is far easier to measure with a ruler.</li>
-      <li><b>Lid addition:</b> By adding 0.5 cm clearance and setting the lid height to x/5, the optimal lid cut is 4.13 cm, giving a lid volume of 240 cm³.</li>
-      <li><b>Model check:</b> our five test trays averaged <b>1.63%</b> error against the predicted 1128.50 cm³, so the model is trustworthy.</li>
+      <li><b>Lid:</b> <span id="pLid">–</span></li>
+      <li><b>Model check:</b> our five test trays averaged <b id="pErr">–</b> error against the predicted 1128.50 cm³, so the model is trustworthy.</li>
       <li><b>Real-world limits:</b> measuring and cutting errors, thickness of cardboard and tape, and rounded folds all make a real box a little different from the model.</li>
-      <li><b>Recommendation:</b> A tray from this sheet holds about 1.13 L. A slightly larger or squarer sheet would increase capacity (best cut = s/6 for a square). We recommend cutting the optimal 4.04 cm for the box and 4.13 cm for its custom lid.</li>
+      <li><b>Recommendation:</b> A tray from this sheet holds about 1.13 L. A squarer sheet would increase capacity (best cut = s/6 for a square). Ship the tray with its matching lid.</li>
     </ul>
   </div>
 </div></section>
@@ -424,67 +325,56 @@ footer{padding:36px 0 60px;color:var(--muted);text-align:center;font-size:14px;b
 <script>
 (function(){
 "use strict";
-const SW=29.7, SH=21, S=16;
+const SW=29.7, SH=21, S=16, CL=0.5;           /* sheet size, pixels per cm, lid clearance */
 const V=x=>x*(SW-2*x)*(SH-2*x);
-const XMAX=(202.8-Math.sqrt(202.8*202.8-4*12*623.7))/24, VMAX=V(XMAX);
+const LID=x=>({L:SW+CL-2*x, W:SH+CL-2*x, H:x/5});
+const lidV=x=>{const d=LID(x);return d.L*d.W*d.H;};
+const XMAX=4.0423, VMAX=V(XMAX);
 const $=id=>document.getElementById(id);
 const f=(n,d=2)=>Number(n).toFixed(d);
 const ease=p=>p<.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2;
 const easeOutBack=p=>{const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(p-1,3)+c1*Math.pow(p-1,2);};
 
-/* ---------- state ---------- */
-const st={x:4.04,cut:0,fold:0,fill:0,marks:false,step:0};
+const st={x:4.04,cut:0,fold:0,fill:0,lid:0,marks:false,step:0};
 
-/* ---------- build 3D parts ---------- */
+/* ---------- 3D parts ---------- */
 const sheet=$("sheet");
 sheet.style.width=SW*S+"px"; sheet.style.height=SH*S+"px";
 $("tilt").style.width=SW*S+"px"; $("tilt").style.height=SH*S+"px";
 const mk=(cls,parent)=>{const d=document.createElement("div");d.className=cls;(parent||sheet).appendChild(d);return d;};
-
-/* soft shadow goes first so it sits behind everything */
 const shadow=mk("shadow");
-
 const base=mk("part base"), back=mk("part back"), front=mk("part front"), left=mk("part left"), right=mk("part right");
 const markOutline=mk("markoutline");
 const corn=[mk("part corn"),mk("part corn"),mk("part corn"),mk("part corn")];
 const wTop=mk("w wtop"), wB=mk("w"), wF=mk("w"), wL=mk("w"), wR=mk("w");
+/* lid: one top panel plus four short skirts, grouped so the whole lid can drop in */
+const lidG=mk("lidg");
+const lidTop=mk("part lidp",lidG), lidF=mk("part lidp front",lidG), lidB=mk("part lidp back",lidG), lidL=mk("part lidp left",lidG), lidR=mk("part lidp right",lidG);
 const px=c=>c*S+"px";
 const place=(el,l,t,w,h)=>{el.style.left=px(l);el.style.top=px(t);el.style.width=px(w);el.style.height=px(h);};
 
 function render(){
   const x=st.x, L=SW-2*x, W=SH-2*x, th=st.fold*90;
   place(base,x,x,L,W);
-  place(back,x,0,L,x);        back.style.transform=`rotateX(${-th}deg)`;
-  place(front,x,SH-x,L,x);    front.style.transform=`rotateX(${th}deg)`;
-  place(left,0,x,x,W);        left.style.transform=`rotateY(${th}deg)`;
-  place(right,SW-x,x,x,W);    right.style.transform=`rotateY(${-th}deg)`;
+  place(back,x,0,L,x);      back.style.transform=`rotateX(${-th}deg)`;
+  place(front,x,SH-x,L,x);  front.style.transform=`rotateX(${th}deg)`;
+  place(left,0,x,x,W);      left.style.transform=`rotateY(${th}deg)`;
+  place(right,SW-x,x,x,W);  right.style.transform=`rotateY(${-th}deg)`;
 
-  /* soft ground shadow under the base */
   const m=1.7;
   place(shadow,x-m,x-m,L+2*m,W+2*m);
-  shadow.style.transform=`translate(6px,8px) translateZ(-2px)`;
+  shadow.style.transform="translate(6px,8px) translateZ(-2px)";
   shadow.style.opacity=Math.min(1,st.fold*1.4)*0.85;
-
-  /* marking outline */
   place(markOutline,x,x,L,W);
 
-  /* corner squares: pop up, tumble away and fade */
+  /* corner squares pop up, tumble away and fade */
   const pos=[[0,0,-1,-1],[SW-x,0,1,-1],[0,SH-x,-1,1],[SW-x,SH-x,1,1]];
-  const u=st.cut;
-  const fly=u*u;
-  const lift=Math.sin(Math.min(1,u*1.25)*Math.PI)*44;
-  const fade=1-Math.pow(u,2);
+  const u=st.cut, fly=u*u, lift=Math.sin(Math.min(1,u*1.25)*Math.PI)*44, fade=1-u*u;
   corn.forEach((c,i)=>{
     const p=pos[i]; place(c,p[0],p[1],x,x);
-    c.style.transform=
-      `translate(${p[2]*fly*150}px,${p[3]*fly*150}px) `+
-      `translateZ(${lift}px) `+
-      `rotateZ(${p[2]*p[3]*u*220}deg) `+
-      `scale(${1-0.35*u})`;
-    c.style.opacity=u>=1?0:fade;
-    c.style.display=u>=0.999?"none":"block";
+    c.style.transform=`translate(${p[2]*fly*150}px,${p[3]*fly*150}px) translateZ(${lift}px) rotateZ(${p[2]*p[3]*u*220}deg) scale(${1-0.35*u})`;
+    c.style.opacity=u>=1?0:fade; c.style.display=u>=0.999?"none":"block";
   });
-
   sheet.classList.toggle("marked",st.marks);
 
   /* water */
@@ -500,49 +390,49 @@ function render(){
     Object.assign(wR.style,{left:bx+bw-e+"px",top:by+e+"px",width:wh+"px",height:bh-2*e+"px",transformOrigin:"0 50%",transform:"rotateY(-90deg)"});
   }
 
+  /* lid: the top panel rests on the rim (z = x), skirts hang down outside the walls */
+  if(st.lid>0.001 && st.fold>=0.999){
+    const d=LID(x), k=d.H, a=x-CL/2, b=x-CL/2;
+    lidG.style.display="block";
+    lidG.style.transform=`translateZ(${x*S+(1-st.lid)*110}px)`;
+    place(lidTop,a,b,d.L,d.W);
+    place(lidF,a,b+d.W,d.L,k);  lidF.style.transform="rotateX(-90deg)";
+    place(lidB,a,b-k,d.L,k);    lidB.style.transform="rotateX(90deg)";
+    place(lidL,a-k,b,k,d.W);    lidL.style.transform="rotateY(-90deg)";
+    place(lidR,a+d.L,b,k,d.W);  lidR.style.transform="rotateY(90deg)";
+  } else lidG.style.display="none";
+
   /* readouts */
-  const v=V(x);
+  const v=V(x), d=LID(x);
   $("xval").textContent=f(x)+" cm";
   $("dL").textContent=f(L)+" cm"; $("dW").textContent=f(W)+" cm"; $("dH").textContent=f(x)+" cm";
-  $("dV").textContent=f(v,1)+" cm³";
-  $("dP").textContent=f(v/VMAX*100,1)+"% of max";
+  $("dV").textContent=f(v,1)+" cm³"; $("dP").textContent=f(v/VMAX*100,1)+"% of max";
   $("calc").innerHTML=`V = x(29.7 − 2x)(21 − 2x)<br>V = ${f(x)} × ${f(L)} × ${f(W)}<br><b>V = ${f(v,1)} cm³</b>`;
+  $("lL").textContent=f(d.L)+" cm"; $("lW").textContent=f(d.W)+" cm"; $("lH").textContent=f(d.H)+" cm"; $("lV").textContent=f(lidV(x),1)+" cm³";
   const wv=st.fill*v;
-  $("wH").textContent=f(st.fill*x)+" cm";
-  $("wV").textContent=f(wv,1)+" cm³";
+  $("wH").textContent=f(st.fill*x)+" cm"; $("wV").textContent=f(wv,1)+" cm³";
   $("wL").textContent=f(wv,0)+" mL"+(wv>=1000?"  ("+f(wv/1000,2)+" L)":"");
   $("wB").style.width=st.fill*100+"%";
-
   drawGraph();
 }
 
-/* ---------- fit the 3D scene to the stage ---------- */
-function fit(){
-  const w=$("stage").clientWidth;
-  $("fit").style.setProperty("--k",Math.min(1,(w-30)/640));
-}
+function fit(){ $("fit").style.setProperty("--k",Math.min(1,($("stage").clientWidth-30)/640)); }
 window.addEventListener("resize",()=>{fit();drawGraph();});
 
 /* ---------- animation ---------- */
 let token=0;
 const sayEl=$("say");
-function say(t){
-  sayEl.textContent=t;
-  sayEl.classList.remove("pop"); void sayEl.offsetWidth; sayEl.classList.add("pop");
-}
-const PROG={0:0,1:25,2:50,3:75,4:75,5:100};
+function say(t){sayEl.textContent=t;sayEl.classList.remove("pop");void sayEl.offsetWidth;sayEl.classList.add("pop");}
+const PROG={0:0,1:20,2:40,3:60,4:60,5:80,6:100};
 function setStep(n){
   st.step=n;
-  document.querySelectorAll("#pills .pill").forEach(p=>{
-    const s=+p.dataset.s; p.classList.toggle("on",s===n); p.classList.toggle("done",s<n);
-  });
+  document.querySelectorAll("#pills .pill").forEach(p=>{const s=+p.dataset.s;p.classList.toggle("on",s===n);p.classList.toggle("done",s<n);});
   if(PROG[n]!==undefined) $("prog").style.width=PROG[n]+"%";
 }
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function tween(ms,fn,my,easing){
   return new Promise(res=>{
-    const ez=easing||ease;
-    const t0=performance.now();
+    const ez=easing||ease, t0=performance.now();
     (function fr(t){
       if(my!==token){res(false);return;}
       const p=Math.min(1,(t-t0)/ms); fn(ez(p)); render();
@@ -550,14 +440,11 @@ function tween(ms,fn,my,easing){
     })(t0);
   });
 }
-function resetState(){
-  token++; st.cut=0;st.fold=0;st.fill=0;st.marks=false;setStep(0);
-  $("stage").classList.remove("done");
-  say("Press ▶ Play to start the animation."); render();
-}
+const clearState=()=>{st.cut=0;st.fold=0;st.fill=0;st.lid=0;st.marks=false;setStep(0);$("stage").classList.remove("done");};
+const finalMsg=()=>`Done! Box ${f(V(st.x),1)} cm³ (≈ ${f(V(st.x)/1000,2)} L) with a ${f(LID(st.x).L)} × ${f(LID(st.x).W)} × ${f(LID(st.x).H)} cm lid.`;
+function resetState(){token++;clearState();say("Press ▶ Play to start the animation.");render();}
 async function play(){
-  const my=++token; st.cut=0;st.fold=0;st.fill=0;st.marks=false;setStep(0);
-  $("stage").classList.remove("done");
+  const my=++token; clearState();
   say("We start with one flat A4 sheet: 29.7 cm × 21 cm."); render();
   await sleep(1300); if(my!==token)return;
   setStep(1); st.marks=true; render();
@@ -571,22 +458,21 @@ async function play(){
   st.fold=1; render();
   await sleep(600); if(my!==token)return;
   setStep(4); say("Now fill it with water to test the volume…");
-  if(!await tween(5200,p=>{st.fill=p; $("prog").style.width=(75+25*p)+"%";},my))return;
-  setStep(5);
-  $("stage").classList.add("done");
-  say(`Full! Volume = ${f(st.x)} × ${f(SW-2*st.x)} × ${f(SH-2*st.x)} = ${f(V(st.x),1)} cm³ (≈ ${f(V(st.x)/1000,2)} litres).`);
+  if(!await tween(5200,p=>{st.fill=p;$("prog").style.width=(60+20*p)+"%";},my))return;
+  await sleep(500); if(my!==token)return;
+  setStep(5); say(`Now the lid: a shallow box 0.5 cm bigger each way, with height x/5 = ${f(st.x/5)} cm.`);
+  if(!await tween(2400,p=>st.lid=p,my))return;
+  setStep(6); $("stage").classList.add("done"); say(finalMsg());
 }
 function finish(){
-  token++; st.cut=1;st.fold=1;st.fill=1;st.marks=false;setStep(5);
-  $("stage").classList.add("done");
-  say(`Finished box: ${f(V(st.x),1)} cm³ (≈ ${f(V(st.x)/1000,2)} litres).`); render();
+  token++; st.cut=1;st.fold=1;st.fill=1;st.lid=1;st.marks=false;setStep(6);
+  $("stage").classList.add("done"); say(finalMsg()); render();
 }
 $("play").onclick=play; $("reset").onclick=resetState; $("done").onclick=finish;
 
-/* ---------- slider / chips ---------- */
 function setX(v){
   st.x=Math.max(.5,Math.min(10.4,v)); $("xs").value=st.x; render();
-  if(st.step===5) say(`Finished box: ${f(V(st.x),1)} cm³ (≈ ${f(V(st.x)/1000,2)} litres).`);
+  if(st.step===6) say(finalMsg());
 }
 $("xs").addEventListener("input",e=>setX(+e.target.value));
 $("best").onclick=()=>setX(+XMAX.toFixed(2));
@@ -594,8 +480,7 @@ document.querySelectorAll(".chip[data-x]").forEach(b=>b.onclick=()=>setX(+b.data
 
 /* ---------- graph ---------- */
 const cv=$("gr"), ctx=cv.getContext("2d");
-const GX0=-1.5, GX1=16, GY0=-450, GY1=1400;
-let gm={l:56,r:16,t:18,b:44};
+const GX0=-1.5, GX1=16, GY0=-450, GY1=1400, gm={l:56,r:16,t:18,b:44};
 function drawGraph(){
   const dpr=window.devicePixelRatio||1, cssW=cv.clientWidth, cssH=420;
   if(!cssW) return;
@@ -611,23 +496,18 @@ function drawGraph(){
   ctx.beginPath();ctx.moveTo(gm.l,Y(0));ctx.lineTo(cssW-gm.r,Y(0));ctx.moveTo(X(0),gm.t);ctx.lineTo(X(0),cssH-gm.b);ctx.stroke();
   ctx.fillStyle="#222";ctx.textAlign="center";ctx.fillText("Cut size x (cm)",(gm.l+cssW-gm.r)/2,cssH-6);
   ctx.save();ctx.translate(14,(gm.t+cssH-gm.b)/2);ctx.rotate(-Math.PI/2);ctx.fillText("Volume V (cm³)",0,0);ctx.restore();
-  const clip=()=>{ctx.beginPath();ctx.rect(gm.l,gm.t,cssW-gm.l-gm.r,cssH-gm.t-gm.b);ctx.clip();};
   const curve=(a,b)=>{ctx.beginPath();for(let x=a;x<=b+1e-9;x+=.05){x===a?ctx.moveTo(X(x),Y(V(x))):ctx.lineTo(X(x),Y(V(x)));}ctx.stroke();};
-  ctx.save();clip();
+  ctx.save();ctx.beginPath();ctx.rect(gm.l,gm.t,cssW-gm.l-gm.r,cssH-gm.t-gm.b);ctx.clip();
   ctx.setLineDash([5,5]);ctx.strokeStyle="#9a9a9a";ctx.lineWidth=1.6;curve(GX0,0);curve(10.5,GX1);ctx.setLineDash([]);
   ctx.strokeStyle="#1f5fa8";ctx.lineWidth=3;curve(0,10.5);
-  /* V = 1000 */
   ctx.strokeStyle="#2b8a3e";ctx.setLineDash([3,4]);ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(gm.l,Y(1000));ctx.lineTo(cssW-gm.r,Y(1000));ctx.stroke();ctx.setLineDash([]);
   ctx.fillStyle="#2b8a3e";[2.5641,5.7096].forEach(x=>{ctx.beginPath();ctx.arc(X(x),Y(1000),4.5,0,7);ctx.fill();});
-  /* data */
   ctx.fillStyle="#d9480f";for(let k=1;k<=7;k++){ctx.beginPath();ctx.arc(X(k),Y(V(k)),4,0,7);ctx.fill();}
-  /* max */
   ctx.fillStyle="#111";ctx.beginPath();ctx.arc(X(XMAX),Y(VMAX),6,0,7);ctx.fill();
   ctx.restore();
   ctx.fillStyle="#111";ctx.textAlign="left";ctx.font="bold 12px system-ui,sans-serif";
   ctx.fillText(`Max (${f(XMAX)}, ${f(VMAX)})`,X(XMAX)+10,Y(VMAX)-10);
   ctx.fillStyle="#2b8a3e";ctx.font="12px system-ui,sans-serif";ctx.fillText("V = 1000",cssW-gm.r-62,Y(1000)-6);
-  /* current x */
   const cx=X(st.x), cy=Y(V(st.x));
   ctx.strokeStyle="#d03a2f";ctx.lineWidth=1.5;ctx.setLineDash([4,3]);
   ctx.beginPath();ctx.moveTo(cx,Y(0));ctx.lineTo(cx,cy);ctx.moveTo(gm.l,cy);ctx.lineTo(cx,cy);ctx.stroke();ctx.setLineDash([]);
@@ -636,13 +516,8 @@ function drawGraph(){
   const tw=ctx.measureText(lab).width+14, lx=Math.min(Math.max(cx-tw/2,gm.l),cssW-gm.r-tw), ly=cy<90?cy+14:cy-32;
   ctx.fillStyle="#fff";ctx.strokeStyle="#d03a2f";ctx.lineWidth=1;ctx.beginPath();ctx.roundRect?ctx.roundRect(lx,ly,tw,20,6):ctx.rect(lx,ly,tw,20);ctx.fill();ctx.stroke();
   ctx.fillStyle="#d03a2f";ctx.textAlign="left";ctx.fillText(lab,lx+7,ly+14);
-  cv._map={X,cssW};
 }
-function pick(e){
-  const r=cv.getBoundingClientRect(), mx=e.clientX-r.left;
-  const x=GX0+(mx-gm.l)/(r.width-gm.l-gm.r)*(GX1-GX0);
-  setX(+x.toFixed(2));
-}
+function pick(e){const r=cv.getBoundingClientRect();setX(+(GX0+(e.clientX-r.left-gm.l)/(r.width-gm.l-gm.r)*(GX1-GX0)).toFixed(2));}
 let drag=false;
 cv.addEventListener("pointerdown",e=>{drag=true;cv.setPointerCapture(e.pointerId);pick(e);});
 cv.addEventListener("pointermove",e=>{if(drag)pick(e);});
@@ -653,29 +528,47 @@ cv.addEventListener("pointerup",()=>drag=false);
   let h="<tr><th>Cut x (cm)</th><th>Length</th><th>Width</th><th>Height</th><th>Volume (cm³)</th></tr>";
   for(let k=1;k<=7;k++) h+=`<tr${k===4?' class="best"':""}><td>${k}</td><td>${f(SW-2*k,1)}</td><td>${f(SH-2*k,0)}</td><td>${k}</td><td>${f(V(k),1)}</td></tr>`;
   $("tbl").innerHTML=h;
+
   let t="<tr><th>x</th>",u="<tr><td>V(x)</td>";
   [3.5,4,4.03,4.04,4.05,4.1,4.5].forEach(x=>{t+=`<th>${x}</th>`;u+=`<td>${f(V(x),x>4&&x<4.1?3:2)}</td>`;});
   $("t1").innerHTML=t+"</tr>"+u+"</tr>";
+
+  t="<tr><th>x</th>";u="<tr><td>V(x)</td>";
+  [2,3,3.5,4,5].forEach(x=>{t+=`<th>${x}</th>`;u+=`<td${x===3.5?' style="font-weight:700;background:#e8f4ea"':""}>${f(x*Math.pow(21-2*x,2),0)}</td>`;});
+  $("t2").innerHTML=t+"</tr>"+u+"</tr>";
+
+  /* design specification: box and lid */
+  const x=4.04, d=LID(x), kk=d.H;
+  $("spec").innerHTML=`<tr><th>Item</th><th>Box</th><th>Lid</th></tr>
+  <tr><td>Sheet</td><td>29.7 × 21 cm</td><td>${f(d.L+2*kk)} × ${f(d.W+2*kk)} cm</td></tr>
+  <tr><td>Cut squares</td><td>4.04 × 4.04 cm</td><td>${f(kk)} × ${f(kk)} cm</td></tr>
+  <tr><td>Length</td><td>${f(SW-2*x)} cm</td><td>${f(d.L)} cm</td></tr>
+  <tr><td>Width</td><td>${f(SH-2*x)} cm</td><td>${f(d.W)} cm</td></tr>
+  <tr><td>Height</td><td>4.04 cm</td><td>${f(kk)} cm</td></tr>
+  <tr><td>Volume</td><td>${f(VMAX)} cm³</td><td>${f(lidV(x),1)} cm³</td></tr>`;
+
+  /* lid working text */
+  $("lidWork").innerHTML=`For x = 4.04: lid = <b>${f(d.L)} × ${f(d.W)} × ${f(kk)} cm</b>, so V<sub>lid</sub> ≈ <b>${f(lidV(x),1)} cm³</b>. To make it, cut ${f(kk)} cm squares from a ${f(d.L+2*kk)} × ${f(d.W+2*kk)} cm sheet.`;
+  $("pLid").innerHTML=`${f(d.L)} × ${f(d.W)} × ${f(kk)} cm (0.5 cm clearance, height x/5), volume ≈ ${f(lidV(x),0)} cm³, cut from a separate ${f(d.L+2*kk)} × ${f(d.W+2*kk)} cm sheet.`;
 })();
 
-/* ---------- volume test trials (built and measured by the team) ---------- */
+/* ---------- volume test trials ---------- */
 (function(){
   const TRIALS=[
-    {m:"Tray 1 · A4 paper, taped corners", d:"21.6 × 12.8 × 4.0", v:21.6*12.8*4.0},
-    {m:"Tray 2 · card stock, glued corners", d:"21.7 × 12.9 × 4.1", v:21.7*12.9*4.1},
-    {m:"Tray 3 · cardboard, taped corners", d:"21.5 × 12.7 × 4.1", v:21.5*12.7*4.1},
-    {m:"Tray 4 · water fill test", d:"—", v:1096},
-    {m:"Tray 5 · rice fill test", d:"—", v:1120}
+    {m:"Tray 1 · A4 paper, taped corners",d:"21.6 × 12.8 × 4.0",v:21.6*12.8*4.0},
+    {m:"Tray 2 · card stock, glued corners",d:"21.7 × 12.9 × 4.1",v:21.7*12.9*4.1},
+    {m:"Tray 3 · cardboard, taped corners",d:"21.5 × 12.7 × 4.1",v:21.5*12.7*4.1},
+    {m:"Tray 4 · water fill test",d:"—",v:1096},
+    {m:"Tray 5 · rice fill test",d:"—",v:1120}
   ];
   let h="<tr><th>Trial</th><th>Measured base × height (cm)</th><th>Measured volume (cm³)</th><th>Percent error</th></tr>";
   h+=`<tr class="best"><td>Model (predicted)</td><td>21.62 × 12.92 × 4.04</td><td>${f(VMAX,1)}</td><td>0.00%</td></tr>`;
   let sum=0;
-  TRIALS.forEach((t,i)=>{
-    const e=Math.abs(t.v-VMAX)/VMAX*100; sum+=e;
-    h+=`<tr><td>${i+1}. ${t.m}</td><td>${t.d}</td><td>${f(t.v,1)}</td><td>${f(e,2)}%</td></tr>`;
-  });
+  TRIALS.forEach((t,i)=>{const e=Math.abs(t.v-VMAX)/VMAX*100;sum+=e;h+=`<tr><td>${i+1}. ${t.m}</td><td>${t.d}</td><td>${f(t.v,1)}</td><td>${f(e,2)}%</td></tr>`;});
   $("tbl2").innerHTML=h;
-  $("avgErr").innerHTML=`Average percent error of the five trials = <b>${f(sum/TRIALS.length,2)}%</b>`;
+  const avg=f(sum/TRIALS.length,2)+"%";
+  $("avgErr").innerHTML=`Average percent error of the five trials = <b>${avg}</b>`;
+  $("pErr").textContent=avg;
 })();
 
 /* ---------- challenge 2 calculator ---------- */
@@ -684,7 +577,6 @@ $("sS").addEventListener("input",sq); sq();
 
 /* ---------- init ---------- */
 fit(); render();
-/* start in the finished-flat state; auto-play when the lab scrolls into view */
 if("IntersectionObserver" in window){
   const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){io.disconnect();setTimeout(play,500);}});},{threshold:.5});
   io.observe($("stage"));
